@@ -1,8 +1,14 @@
+import time
 from time import sleep
-from pymilvus import DataType, connections, utility, Collection, CollectionSchema, FieldSchema, DataType
+from pymilvus import DataType, connections, utility, Collection, CollectionSchema, FieldSchema, DataType, MilvusClient
 import os
 
 from ..base.module import BaseANN
+
+MILVUS_URI = "http://127.0.0.1:19530"
+MILVUS_DEFAULT_USER = "root"
+MILVUS_DEFAULT_PASSWORD = "Milvus"
+MILVUS_DEFAULT_DB = "default"
 
 
 def metric_mapping(_metric: str):
@@ -19,21 +25,34 @@ class Milvus(BaseANN):
         self._metric_type = metric_mapping(self._metric)
         self.start_milvus()
         self.connects = connections
-        max_trys = 10
-        for try_num in range(max_trys):
+        max_tries = 10
+        for try_num in range(max_tries):
             try:
-                self.connects.connect("default", host='localhost', port='19530')
+                self._client = MilvusClient(uri=MILVUS_URI,
+                                            token=f"{MILVUS_DEFAULT_USER}:{MILVUS_DEFAULT_PASSWORD}",
+                                            db_name=MILVUS_DEFAULT_DB
+                                            )
+
+                self.connects.connect(
+                    alias="utility_connection",
+                    host='localhost',
+                    port='19530',
+                    token=f"{MILVUS_DEFAULT_USER}:{MILVUS_DEFAULT_PASSWORD}"
+                )
                 break
             except Exception as e:
-                if try_num == max_trys - 1:
+                if try_num == max_tries - 1:
                     raise Exception(f"[Milvus] connect to milvus failed: {e}!!!")
                 print(f"[Milvus] try to connect to milvus again...")
                 sleep(1)
-        print(f"[Milvus] Milvus version: {utility.get_server_version()}")
+
+        server_version = utility.get_server_version(using="utility_connection")
+        print(f"[Milvus] Milvus version: {server_version}")
+
         self.collection_name = "test_milvus"
-        if utility.has_collection(self.collection_name):
+        if self._client.has_collection(self.collection_name):
             print(f"[Milvus] collection {self.collection_name} already exists, drop it...")
-            utility.drop_collection(self.collection_name)
+            self._client.drop_collection(self.collection_name)
 
     def start_milvus(self):
         try:
@@ -51,40 +70,51 @@ class Milvus(BaseANN):
             print(f"[Milvus] docker compose down failed: {e}!!!")
 
     def create_collection(self):
-        filed_id = FieldSchema(
-            name="id",
-            dtype=DataType.INT64,
-            is_primary=True
-        )
-        filed_vec = FieldSchema(
-            name="vector",
-            dtype=DataType.FLOAT_VECTOR,
+
+        milvus_schema = self._client.create_schema(auto_id=False, enable_dynamic_field=False, primary_field="id")
+        milvus_schema.add_field(field_name="id", datatype=DataType.INT64)
+
+        milvus_schema.add_field(
+            field_name="vector",
+            datatype=DataType.FLOAT_VECTOR,
             dim=self._dim
         )
-        schema = CollectionSchema(
-            fields=[filed_id, filed_vec],
+
+        self._client.create_collection(
+            collection_name=self.collection_name,
+            schema=milvus_schema,
             description="Test milvus search",
+            kwargs={"consistence_level": "STRONG"}
         )
-        self.collection = Collection(
-            self.collection_name,
-            schema,
-            consistence_level="STRONG"
-        )
-        print(f"[Milvus] Create collection {self.collection.describe()} successfully!!!")
+
+        collection_description = self._client.describe_collection(self.collection_name)
+
+        print(f"[Milvus] Create collection {collection_description} successfully!!!")
 
     def insert(self, X):
         # insert data
         print(f"[Milvus] Insert {len(X)} data into collection {self.collection_name}...")
         batch_size = 1000
+        insertion_count = 0
+        start_time = time.time()
+
         for i in range(0, len(X), batch_size):
             batch_data = X[i: min(i + batch_size, len(X))]
-            entities = [
-                [i for i in range(i, min(i + batch_size, len(X)))],
-                batch_data.tolist()
-            ]
-            self.collection.insert(entities)
-        self.collection.flush()
-        print(f"[Milvus] {self.collection.num_entities} data has been inserted into collection {self.collection_name}!!!")
+            entities = list(range(len(batch_data)))
+
+            for index, entry in enumerate(batch_data):
+                entities[index] = {
+                    "id": index,
+                    "vector": entry
+                }
+            insertion_result = self._client.insert(self.collection_name, entities)
+            insertion_count += insertion_result["insert_count"]
+
+        end_time = time.time()
+        # TODO: Find a way to flush the collection
+        # self.collection.flush()
+        print(f"[Milvus] {insertion_count} data has been inserted into collection {self.collection_name}!!!")
+        print(f"[Milvus] Inserting data took {end_time - start_time} seconds.")
 
     def get_index_param(self):
         raise NotImplementedError()
@@ -92,27 +122,37 @@ class Milvus(BaseANN):
     def create_index(self):
         # create index
         print(f"[Milvus] Create index for collection {self.collection_name}...")
-        self.collection.create_index(
-            field_name = "vector",
-            index_params = self.get_index_param(),
-            index_name = "vector_index"
+        index_params = self._client.prepare_index_params()
+
+        index_params.add_index(
+            field_name="vector",
+            index_name="vector_index"
         )
+        self._client.create_index(self.collection_name, index_params)
+
         utility.wait_for_index_building_complete(
-            collection_name = self.collection_name,
-            index_name = "vector_index"
+            collection_name=self.collection_name,
+            index_name="vector_index",
+            using="utility_connection"
         )
-        index = self.collection.index(index_name = "vector_index")
-        index_progress =  utility.index_building_progress(
-            collection_name = self.collection_name,
-            index_name = "vector_index"
+
+        index_progress = utility.index_building_progress(
+            collection_name=self.collection_name,
+            index_name="vector_index",
+            using="utility_connection"
         )
-        print(f"[Milvus] Create index {index.to_dict()} {index_progress} for collection {self.collection_name} successfully!!!")
+        index_description = self._client.describe_index(self.collection_name, "vector_index")
+
+        print(
+            f"[Milvus] Create index {index_description} {index_progress} for collection {self.collection_name} "
+            f"successfully!!!")
 
     def load_collection(self):
         # load collection
         print(f"[Milvus] Load collection {self.collection_name}...")
-        self.collection.load()
-        utility.wait_for_loading_complete(self.collection_name)
+        self._client.load_collection(self.collection_name)
+
+        utility.wait_for_loading_complete(self.collection_name, using="utility_connection")
         print(f"[Milvus] Load collection {self.collection_name} successfully!!!")
 
     def fit(self, X):
@@ -122,19 +162,22 @@ class Milvus(BaseANN):
         self.load_collection()
 
     def query(self, v, n):
-        results = self.collection.search(
-            data = [v],
-            anns_field = "vector",
-            param = self.search_params,
-            limit = n,
+        results = self._client.search(
+            collection_name=self.collection_name,
+            data=[v],
+            anns_field="vector",
+            search_param=self.search_params,
+            limit=n,
             output_fields=["id"]
         )
-        ids = [r.entity.get("id") for r in results[0]]
+        ids = [r["id"] for r in results[0]]
         return ids
 
     def done(self):
-        self.collection.release()
-        utility.drop_collection(self.collection_name)
+        if self._client.has_collection(self.collection_name):
+            self._client.release_collection(self.collection_name)
+            self._client.drop_collection(self.collection_name)
+
         self.stop_milvus()
 
 
@@ -153,11 +196,12 @@ class MilvusFLAT(Milvus):
         self.search_params = {
             "metric_type": self._metric_type,
         }
-        results = self.collection.search(
-            data = [v],
-            anns_field = "vector",
-            param = self.search_params,
-            limit = n,
+        results = self._client.search(
+            collection_name=self.collection_name,
+            data=[v],
+            anns_field="vector",
+            param=self.search_params,
+            limit=n,
             output_fields=["id"]
         )
         ids = [r.entity.get("id") for r in results[0]]
@@ -222,11 +266,11 @@ class MilvusIVFPQ(Milvus):
             "params": {
                 "nlist": self._index_nlist,
                 "m": self._index_m,
-                "nbits": self._index_nbits if self._index_nbits else 8 
+                "nbits": self._index_nbits if self._index_nbits else 8
             },
             "metric_type": self._metric_type
         }
-    
+
     def set_query_arguments(self, nprobe):
         self.search_params = {
             "metric_type": self._metric_type,
