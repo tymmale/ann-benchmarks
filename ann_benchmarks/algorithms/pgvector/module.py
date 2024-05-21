@@ -7,22 +7,22 @@ import psycopg
 from ..base.module import BaseANN
 
 
-def stop_postgres():
-    try:
-        subprocess.run("service postgresql stop", shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
-
-        print("[PostgreSQL] PotsgreSQL service has been started!")
-    except Exception as e:
-        print(f"[PostgreSQL] PostgreSQL service could not be started: {e}!")
-
-
 def start_postgres():
     try:
         subprocess.run("service postgresql start", shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
 
+        print("[PostgreSQL] PotsgreSQL service has been started!")
+    except Exception as e:
+        print(f"[PostgreSQL]  PotsgreSQL service could not be started: {e}!")
+
+
+def stop_postgres():
+    try:
+        subprocess.run("service postgresql stop", shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
+
         print("[PostgreSQL] PotsgreSQL service has been stopped!")
     except Exception as e:
-        print(f"[PostgreSQL]  PotsgreSQL service could not be stopped: {e}!")
+        print(f"[PostgreSQL] PostgreSQL service could not be stopped: {e}!")
 
 
 class PGVector(BaseANN):
@@ -66,11 +66,12 @@ class PGVector(BaseANN):
 
             if self._metric == "angular":
                 conn.execute(
-                    f"CREATE INDEX ON items USING hnsw (embedding vector_cosine_ops) WITH "
+                    f"CREATE INDEX items_embedding_idx ON items USING hnsw (embedding vector_cosine_ops) WITH "
                     f"(m = {self._m}, ef_construction = {self._ef_construction})")
             elif self._metric == "euclidean":
-                conn.execute(f"CREATE INDEX ON items USING hnsw (embedding vector_l2_ops) WITH (m = {self._m}, "
-                             f"ef_construction = {self._ef_construction})")
+                conn.execute(
+                    f"CREATE INDEX items_embedding_idx ON items USING hnsw (embedding vector_l2_ops) WITH (m = {self._m}, "
+                    f"ef_construction = {self._ef_construction})")
             else:
                 raise RuntimeError(f"unknown metric {self._metric}")
             print("done!")
@@ -81,7 +82,7 @@ class PGVector(BaseANN):
         with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
             pgvector.psycopg.register_vector(conn)
 
-            conn.execute("SET hnsw.ef_search = %d" % ef_search)
+            conn.execute(f"SET hnsw.ef_search = {ef_search}")
 
     def query(self, v, n):
         with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
