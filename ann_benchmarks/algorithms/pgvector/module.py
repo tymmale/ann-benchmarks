@@ -32,10 +32,9 @@ class PGVector(BaseANN):
     password=ann
 """
 
-    def __init__(self, metric, method_param):
+    def __init__(self, metric, index_param):
         self._metric = metric
-        self._m = method_param['M']
-        self._ef_construction = method_param['efConstruction']
+
         start_postgres()
 
         if metric == "angular":
@@ -63,26 +62,11 @@ class PGVector(BaseANN):
                     copy.write_row((i, embedding))
 
             print("creating index...")
-
-            if self._metric == "angular":
-                conn.execute(
-                    f"CREATE INDEX items_embedding_idx ON items USING hnsw (embedding vector_cosine_ops) WITH "
-                    f"(m = {self._m}, ef_construction = {self._ef_construction})")
-            elif self._metric == "euclidean":
-                conn.execute(
-                    f"CREATE INDEX items_embedding_idx ON items USING hnsw (embedding vector_l2_ops) WITH (m = {self._m}, "
-                    f"ef_construction = {self._ef_construction})")
-            else:
-                raise RuntimeError(f"unknown metric {self._metric}")
+            conn.execute(self.get_index_param())
             print("done!")
 
     def set_query_arguments(self, ef_search):
-        self._ef_search = ef_search
-
-        with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
-            pgvector.psycopg.register_vector(conn)
-
-            conn.execute(f"SET hnsw.ef_search = {ef_search}")
+        raise NotImplementedError()
 
     def query(self, v, n):
         with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
@@ -90,10 +74,6 @@ class PGVector(BaseANN):
 
             result = conn.execute(self._query, (v, n), binary=True, prepare=True)
             return [index for index, in result.fetchall()]
-
-    def done(self):
-        # Stop PostgreSQL service
-        stop_postgres()
 
     def get_memory_usage(self):
         try:
@@ -103,8 +83,74 @@ class PGVector(BaseANN):
                 result = conn.execute("SELECT pg_relation_size('items_embedding_idx');")
                 return result.fetchone()[0] / 1024
         except Exception as e:
-            print(f"[PostgreSQL] Memory usage could be fetched: {e}")
+            print(f"[PostgreSQL] Memory usage could not be fetched: {e}")
             return 0
 
+    def done(self):
+        # Stop PostgreSQL service
+        stop_postgres()
+
+    def get_index_param(self):
+        raise NotImplementedError()
+
     def __str__(self):
-        return f"PGVector(m={self._m}, ef_construction={self._ef_construction}, ef_search={self._ef_search})"
+        raise NotImplementedError()
+
+
+class PGVectorIVFFLAT(PGVector):
+    def __init__(self, metric, index_param):
+        super().__init__(self, metric, index_param)
+        self._index_nlist = index_param.get("nlist", None)
+
+    def get_index_param(self):
+        if self._metric == "angular":
+            return (f"CREATE INDEX items_embedding_idx ON items USING ivfflat (embedding vector_cosine_ops) "
+                    f"WITH (lists = {self._index_nlist}")
+
+        elif self._metric == "euclidean":
+            return (f"CREATE INDEX items_embedding_idx ON items USING ivfflat (embedding vector_l2_ops) "
+                    f"WITH (lists = {self._index_nlist}")
+        else:
+            raise RuntimeError(f"unknown metric {self._metric}")
+
+    def set_query_arguments(self, nrpobe):
+        self.nprobe = nrpobe
+
+        with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
+            pgvector.psycopg.register_vector(conn)
+
+            conn.execute(f"SET ivfflat.probes {nrpobe}")
+
+    def __str__(self):
+        return f"PGVector metric:{self._metric} index_nlist:{self._index_nlist}"
+
+
+class PGVectorHSNW(PGVector):
+    def __init__(self, metric, index_param):
+        super().__init__(self, metric, index_param)
+
+        self._index_m = index_param.get("M", None)
+        self._index_ef = index_param.get("efConstruction", None)
+
+    def get_index_param(self):
+        if self._metric == "angular":
+            return (f"CREATE INDEX items_embedding_idx ON items USING hnsw (embedding vector_cosine_ops) "
+                    f"WITH (m = {self._index_m}, ef_construction = {self._index_ef})")
+
+        elif self._metric == "euclidean":
+            return (f"CREATE INDEX items_embedding_idx ON items USING hnsw (embedding vector_l2_ops) "
+                    f"WITH (m = {self._index_m}, ef_construction = {self._index_ef})")
+        else:
+            raise RuntimeError(f"unknown metric {self._metric}")
+
+    def set_query_arguments(self, ef):
+        self._ef_search = ef
+
+        with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
+            pgvector.psycopg.register_vector(conn)
+
+            conn.execute(f"SET hnsw.ef_search = {ef}")
+
+    def __str__(self):
+        return (f"PGVector metric:{self._metric}, index_m:{self._index_m}, index_ef:{self._index_ef}, "
+                f"search_ef:{self._ef_search}")
