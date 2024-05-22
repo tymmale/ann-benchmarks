@@ -170,6 +170,7 @@ class Milvus(BaseANN):
             limit=n,
             output_fields=["id"]
         )
+
         ids = [r["id"] for r in results[0]]
         return ids
 
@@ -196,15 +197,16 @@ class MilvusFLAT(Milvus):
         self.search_params = {
             "metric_type": self._metric_type,
         }
+
         results = self._client.search(
             collection_name=self.collection_name,
             data=[v],
             anns_field="vector",
-            param=self.search_params,
+            search_param=self.search_params,
             limit=n,
             output_fields=["id"]
         )
-        ids = [r.entity.get("id") for r in results[0]]
+        ids = [r["id"] for r in results[0]]
         return ids
 
 
