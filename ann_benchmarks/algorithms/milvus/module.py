@@ -325,3 +325,23 @@ class MilvusSCANN(Milvus):
             "params": {"nprobe": nprobe}
         }
         self.name = f"MilvusSCANN metric:{self._metric}, index_nlist:{self._index_nlist}, search_nprobe:{nprobe}"
+
+# TODO: Ensure only L2 distance!!
+class MilvusDISKANN(Milvus):
+    def __init__(self, metric, dim, index_param):
+        super().__init__(metric, dim, index_param)
+
+    def get_index_param(self):
+        return {
+            "index_type": "DISKANN",
+            "metric_type": self._metric_type
+        }
+
+    def set_query_arguments(self, search_list):
+
+        self.search_params = {
+            "metric_type": self._metric_type,
+            "params": {"search_list": search_list}
+        }
+
+        self.name = f"MilvusDISKANN metric:{self._metric}, search_search_list={search_list}"
