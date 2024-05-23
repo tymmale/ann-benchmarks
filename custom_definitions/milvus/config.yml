@@ -67,6 +67,7 @@ float:
           args:
             nlist: [64, 128, 256, 512, 1024, 2048, 4096, 8192]
           query_args: [[1, 10, 20, 30, 50]]
+  euclidean:
     - base_args: [ "@metric", "@dimension" ]
       constructor: MilvusDISKANN
       disabled: false
@@ -75,4 +76,6 @@ float:
       name: milvus-diskann
       run_groups:
         DISKANN:
-          query_args: [ [ 1, 10, 20, 30, 50 ] ]
+          args:
+            placeholder: [0]
+          query_args: [[1, 10, 20, 30, 50]]
