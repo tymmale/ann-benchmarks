@@ -342,7 +342,7 @@ def run_docker(
 
     def stream_logs():
         for line in container.logs(stream=True):
-            logger.info(colors.color(line.decode().rstrip(), fg="blue"))
+            logger.info(line.decode().rstrip())
 
     t = threading.Thread(target=stream_logs, daemon=True)
     t.start()
@@ -384,7 +384,7 @@ def _handle_container_return_value(
 
     if exit_code not in [0, None]:
         for line in container.logs(stream=True):
-            logger.error(colors.color(line.decode(), fg="red"))
+            logger.error(line.decode())
         logger.error(msg)
     else:
         logger.info(msg)
