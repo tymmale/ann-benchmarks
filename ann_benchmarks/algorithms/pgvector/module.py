@@ -99,35 +99,35 @@ class PGVector(BaseANN):
 
 class PGVectorIVFFLAT(PGVector):
     def __init__(self, metric, index_param):
-        super().__init__(self, metric, index_param)
+        super().__init__(metric, index_param)
         self._index_nlist = index_param.get("nlist", None)
 
     def get_index_param(self):
         if self._metric == "angular":
             return (f"CREATE INDEX items_embedding_idx ON items USING ivfflat (embedding vector_cosine_ops) "
-                    f"WITH (lists = {self._index_nlist}")
+                    f"WITH (lists = {self._index_nlist})")
 
         elif self._metric == "euclidean":
             return (f"CREATE INDEX items_embedding_idx ON items USING ivfflat (embedding vector_l2_ops) "
-                    f"WITH (lists = {self._index_nlist}")
+                    f"WITH (lists = {self._index_nlist})")
         else:
             raise RuntimeError(f"unknown metric {self._metric}")
 
-    def set_query_arguments(self, nrpobe):
-        self.nprobe = nrpobe
+    def set_query_arguments(self, nprobe):
+        self.nprobe = nprobe
 
         with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
             pgvector.psycopg.register_vector(conn)
 
-            conn.execute(f"SET ivfflat.probes {nrpobe}")
+            conn.execute(f"SET ivfflat.probes = {nprobe}")
 
     def __str__(self):
         return f"PGVector metric:{self._metric} index_nlist:{self._index_nlist}"
 
 
-class PGVectorHSNW(PGVector):
+class PGVectorHNSW(PGVector):
     def __init__(self, metric, index_param):
-        super().__init__(self, metric, index_param)
+        super().__init__(metric, index_param)
 
         self._index_m = index_param.get("M", None)
         self._index_ef = index_param.get("efConstruction", None)
