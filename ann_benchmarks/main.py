@@ -92,6 +92,10 @@ def parse_arguments() -> argparse.Namespace:
         "--definitions", metavar="FOLDER", help="base directory of algorithms. Algorithm definitions expected at 'FOLDER/*/config.yml'", default="ann_benchmarks/algorithms"
     )
     parser.add_argument("--algorithm", metavar="NAME", help="run only the named algorithm", default=None)
+    parser.add_argument("--run-group",
+                        help="run all algorithms that belong to the provided algorithm",
+                        action="store_true"
+                        )
     parser.add_argument(
         "--docker-tag", metavar="NAME", help="run only algorithms in a particular docker image", default=None
     )
@@ -325,8 +329,11 @@ def main():
     )
 
     if args.algorithm:
-        logger.info(f"running only {args.algorithm}")
-        definitions = [d for d in definitions if d.algorithm == args.algorithm]
+        logger.info(f"running only {args.algorithm} group")
+        if args.run_group:
+            definitions = [d for d in definitions if args.algorithm in d.algorithm]
+        else:
+            definitions = [d for d in definitions if d.algorithm == args.algorithm]
 
     if not args.local:
         definitions = filter_by_available_docker_images(definitions)
