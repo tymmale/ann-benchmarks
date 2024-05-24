@@ -87,6 +87,14 @@ class Milvus(BaseANN):
             kwargs={"consistence_level": "STRONG"}
         )
 
+        # Use it to flush the collection
+        self.collection = Collection(
+            self.collection_name,
+            milvus_schema,
+            consistence_level="STRONG",
+            using="utility_connection"
+        )
+
         collection_description = self._client.describe_collection(self.collection_name)
 
         print(f"[Milvus] Create collection {collection_description} successfully!!!")
@@ -111,8 +119,9 @@ class Milvus(BaseANN):
             insertion_count += insertion_result["insert_count"]
 
         end_time = time.time()
-        # TODO: Find a way to flush the collection
-        # self.collection.flush()
+        # Seal all segments in the collection after data is inserted
+        self.collection.flush(using="utility_connection")
+
         print(f"[Milvus] {insertion_count} data has been inserted into collection {self.collection_name}!!!")
         print(f"[Milvus] Inserting data took {end_time - start_time} seconds.")
 
