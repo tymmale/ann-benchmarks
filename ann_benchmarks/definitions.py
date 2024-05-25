@@ -188,7 +188,7 @@ def _get_algorithm_definitions(point_type: str, distance_metric: str, base_dir: 
     }
     ```
     """
-    configs = load_configs(point_type)
+    configs = load_configs(point_type, base_dir)
     definitions = {}
 
     # param `_` is filename, not specific name
