@@ -8,24 +8,6 @@ import psycopg
 from ..base.module import BaseANN
 
 
-def start_postgres():
-    try:
-        subprocess.run("service postgresql start", shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
-
-        print("[PostgreSQL] PotsgreSQL service has been started!")
-    except Exception as e:
-        print(f"[PostgreSQL]  PotsgreSQL service could not be started: {e}!")
-
-
-def stop_postgres():
-    try:
-        subprocess.run("service postgresql stop", shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
-
-        print("[PostgreSQL] PotsgreSQL service has been stopped!")
-    except Exception as e:
-        print(f"[PostgreSQL] PostgreSQL service could not be stopped: {e}!")
-
-
 class PGVector(BaseANN):
     _connection_string = """
     dbname=ann
@@ -36,7 +18,12 @@ class PGVector(BaseANN):
     def __init__(self, metric, index_param):
         self._metric = metric
 
-        start_postgres()
+        self._conn = None
+        self._cur = None
+
+        self._is_running = False
+
+        self.start_postgres()
 
         if metric == "angular":
             self._query = "SELECT id FROM items ORDER BY embedding <=> %s LIMIT %s"
@@ -45,60 +32,85 @@ class PGVector(BaseANN):
         else:
             raise RuntimeError(f"unknown metric {metric}")
 
+    def start_postgres(self):
+        try:
+            if not self._is_running:
+                subprocess.run("service postgresql start", shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
+                self._is_running =True
+
+                print("[PostgreSQL] PotsgreSQL service has been started!")
+            else:
+                print("[PostgreSQL] PotsgreSQL service has already stopped. Doing nothing!")
+        except Exception as e:
+            print(f"[PostgreSQL]  PotsgreSQL service could not be started: {e}!")
+
+    def stop_postgres(self):
+        try:
+            if self._is_running:
+                subprocess.run("service postgresql stop", shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
+                self._is_running = False
+
+                print("[PostgreSQL] PotsgreSQL service has been stopped!")
+            else:
+                print("[PostgreSQL] PotsgreSQL service has already stopped. Doing nothing!")
+        except Exception as e:
+            print(f"[PostgreSQL] PostgreSQL service could not be stopped: {e}!")
+
     def fit(self, X):
-        with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
-            pgvector.psycopg.register_vector(conn)
-            start_postgres()
+        self.start_postgres()
 
-            conn.execute("DROP TABLE IF EXISTS items")
-            conn.execute(f"CREATE TABLE items (id int, embedding vector({X.shape[1]}))")
-            conn.execute("ALTER TABLE items ALTER COLUMN embedding SET STORAGE PLAIN")
-            print("copying data...")
+        conn = psycopg.connect(conninfo=self._connection_string, autocommit=True)
+        pgvector.psycopg.register_vector(conn)
 
-            cur = conn.cursor()
+        cur = conn.cursor()
 
-            with cur.copy("COPY items (id, embedding) FROM STDIN WITH (FORMAT BINARY)") as copy:
-                start_time = time.time()
+        cur.execute("DROP TABLE IF EXISTS items")
+        cur.execute(f"CREATE TABLE items (id int, embedding vector({X.shape[1]}))")
+        cur.execute("ALTER TABLE items ALTER COLUMN embedding SET STORAGE PLAIN")
 
-                copy.set_types(["int4", "vector"])
-                for i, embedding in enumerate(X):
-                    copy.write_row((i, embedding))
+        print("copying data...")
+        with cur.copy("COPY items (id, embedding) FROM STDIN WITH (FORMAT BINARY)") as copy:
+            start_time = time.time()
 
-                end_time = time.time()
+            copy.set_types(["int4", "vector"])
+            for i, embedding in enumerate(X):
+                copy.write_row((i, embedding))
 
-            print(f"[PostgreSQL] Copying data took {end_time - start_time} seconds.")
+            end_time = time.time()
 
-            print("creating index...")
-            conn.execute(self.get_index_param())
-            print("done!")
+        print(f"[PostgreSQL] Copying data took {end_time - start_time} seconds.")
+
+        print("creating index...")
+        cur.execute(self.get_index_param())
+        print("done!")
+
+        self._conn = conn
+        self._cur = cur
 
     def set_query_arguments(self, ef_search):
         raise NotImplementedError()
 
     def query(self, v, n):
-        with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
-            pgvector.psycopg.register_vector(conn)
+        query_result = self._cur.execute(self._query, (v, n), binary=True, prepare=True)
+        results = [index for index, in query_result.fetchall()]
 
-            query_result = conn.execute(self._query, (v, n), binary=True, prepare=True)
-            results = [index for index, in query_result.fetchall()]
-            return results
+        return results
 
     def get_memory_usage(self):
-        # NOTE: This method is also called at the beginning when the index does not yet exist;
-        # in that case simply return 0.
-        try:
-            with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
-                pgvector.psycopg.register_vector(conn)
-
-                result = conn.execute("SELECT pg_relation_size('items_embedding_idx');")
-                return result.fetchone()[0] / 1024
-        except Exception as e:
-            print(f"[PostgreSQL] Memory usage could not be fetched: {e}")
+        if self._cur is not None:
+            result = self._cur.execute("SELECT pg_relation_size('items_embedding_idx');")
+            return result.fetchone()[0] / 1024
+        else:
+            print(f"[PostgreSQL] Memory usage could not be fetched because cursor is None!")
             return 0
 
     def done(self):
         # Stop PostgreSQL service
-        stop_postgres()
+        self.stop_postgres()
+
+        # Close connections
+        self._cur.close()
+        self._conn.close()
 
     def get_index_param(self):
         raise NotImplementedError()
