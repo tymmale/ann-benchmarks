@@ -132,8 +132,11 @@ class Milvus(BaseANN):
         # create index
         print(f"[Milvus] Create index for collection {self.collection_name}...")
         index_params = self._client.prepare_index_params()
+        index_config = self.get_index_param()
 
         index_params.add_index(
+            index_type=index_config["index_type"],
+            metric_type=index_config["metric_type"],
             field_name="vector",
             index_name="vector_index"
         )
