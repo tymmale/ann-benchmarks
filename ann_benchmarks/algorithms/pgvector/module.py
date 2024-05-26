@@ -144,7 +144,7 @@ class PGVectorIVFFLAT(PGVector):
             conn.execute(f"SET ivfflat.probes = {nprobe}")
 
     def __str__(self):
-        return f"PGVector metric:{self._metric} index_nlist:{self._index_nlist}"
+        return f"PGVectorIVFFLAT metric:{self._metric} index_nlist:{self._index_nlist}, search_nprobe{self.nprobe}"
 
 
 class PGVectorHNSW(PGVector):
@@ -174,5 +174,5 @@ class PGVectorHNSW(PGVector):
             conn.execute(f"SET hnsw.ef_search = {ef}")
 
     def __str__(self):
-        return (f"PGVector metric:{self._metric}, index_m:{self._index_m}, index_ef:{self._index_ef}, "
+        return (f"PGVectorHSNW metric:{self._metric}, index_M:{self._index_m}, index_ef:{self._index_ef}, "
                 f"search_ef:{self._ef_search}")
