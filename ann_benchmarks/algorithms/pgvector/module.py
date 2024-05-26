@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import time
 
 import pgvector.psycopg
 import psycopg
@@ -55,11 +56,17 @@ class PGVector(BaseANN):
             print("copying data...")
 
             cur = conn.cursor()
+
             with cur.copy("COPY items (id, embedding) FROM STDIN WITH (FORMAT BINARY)") as copy:
+                start_time = time.time()
 
                 copy.set_types(["int4", "vector"])
                 for i, embedding in enumerate(X):
                     copy.write_row((i, embedding))
+
+                end_time = time.time()
+
+            print(f"[PostgreSQL] Copying data took {end_time - start_time} seconds.")
 
             print("creating index...")
             conn.execute(self.get_index_param())
