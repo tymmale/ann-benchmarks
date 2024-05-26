@@ -72,8 +72,9 @@ class PGVector(BaseANN):
         with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
             pgvector.psycopg.register_vector(conn)
 
-            result = conn.execute(self._query, (v, n), binary=True, prepare=True)
-            return [index for index, in result.fetchall()]
+            query_result = conn.execute(self._query, (v, n), binary=True, prepare=True)
+            results = [index for index, in query_result.fetchall()]
+            return results
 
     def get_memory_usage(self):
         try:
