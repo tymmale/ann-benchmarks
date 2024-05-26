@@ -384,7 +384,7 @@ def _handle_container_return_value(
 
     if exit_code not in [0, None]:
         for line in container.logs(stream=True):
-            logger.error(line.decode())
+            logger.error(colors.color(line.decode(), fg="red"))
         logger.error(msg)
     else:
         logger.info(msg)
