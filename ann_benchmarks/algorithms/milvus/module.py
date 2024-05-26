@@ -112,7 +112,7 @@ class Milvus(BaseANN):
 
             for index, entry in enumerate(batch_data):
                 entities[index] = {
-                    "id": min(index + batch_size, len(X)),
+                    "id": min(index + i, len(X)),
                     "vector": entry
                 }
             insertion_result = self._client.insert(self.collection_name, entities)
