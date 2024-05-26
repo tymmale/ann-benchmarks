@@ -54,7 +54,7 @@ class Milvus(BaseANN):
             print(f"[Milvus] collection {self.collection_name} already exists, drop it...")
             self._client.drop_collection(self.collection_name)
 
-    def start_milvus(self):
+    def start_milvus(self) -> None:
         try:
             os.system("docker compose down")
             os.system("docker compose up -d")
@@ -62,14 +62,14 @@ class Milvus(BaseANN):
         except Exception as e:
             print(f"[Milvus] docker compose up failed: {e}!!!")
 
-    def stop_milvus(self):
+    def stop_milvus(self) -> None:
         try:
             os.system("docker compose down")
             print("[Milvus] docker compose down successfully!!!")
         except Exception as e:
             print(f"[Milvus] docker compose down failed: {e}!!!")
 
-    def create_collection(self):
+    def create_collection(self) -> None:
 
         milvus_schema = self._client.create_schema(auto_id=False, enable_dynamic_field=False, primary_field="id")
         milvus_schema.add_field(field_name="id", datatype=DataType.INT64)
@@ -99,7 +99,7 @@ class Milvus(BaseANN):
 
         print(f"[Milvus] Create collection {collection_description} successfully!!!")
 
-    def insert(self, X):
+    def insert(self, X) -> None:
         # insert data
         print(f"[Milvus] Insert {len(X)} data into collection {self.collection_name}...")
         batch_size = 1000
@@ -125,10 +125,10 @@ class Milvus(BaseANN):
         print(f"[Milvus] {insertion_count} data has been inserted into collection {self.collection_name}!!!")
         print(f"[Milvus] Inserting data took {end_time - start_time} seconds.")
 
-    def get_index_param(self):
+    def get_index_param(self) -> dict:
         raise NotImplementedError()
 
-    def create_index(self):
+    def create_index(self) -> None:
         # create index
         print(f"[Milvus] Create index for collection {self.collection_name}...")
         index_params = self._client.prepare_index_params()
@@ -159,7 +159,7 @@ class Milvus(BaseANN):
             f"[Milvus] Create index {index_description} {index_progress} for collection {self.collection_name} "
             f"successfully!!!")
 
-    def load_collection(self):
+    def load_collection(self) -> None:
         # load collection
         print(f"[Milvus] Load collection {self.collection_name}...")
         self._client.load_collection(self.collection_name)
