@@ -338,7 +338,7 @@ class MilvusSCANN(Milvus):
         }
         self.name = f"MilvusSCANN metric:{self._metric}, index_nlist:{self._index_nlist}, search_nprobe:{nprobe}"
 
-# TODO: Ensure only L2 distance!!
+
 class MilvusDISKANN(Milvus):
     def __init__(self, metric, dim, index_param):
         super().__init__(metric, dim, index_param)
