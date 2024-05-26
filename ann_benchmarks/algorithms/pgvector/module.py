@@ -77,6 +77,8 @@ class PGVector(BaseANN):
             return results
 
     def get_memory_usage(self):
+        # NOTE: This method is also called at the beginning when the index does not yet exist;
+        # in that case simply return 0.
         try:
             with psycopg.connect(conninfo=self._connection_string, autocommit=True) as conn:
                 pgvector.psycopg.register_vector(conn)
