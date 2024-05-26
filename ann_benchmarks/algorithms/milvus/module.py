@@ -135,10 +135,11 @@ class Milvus(BaseANN):
         index_config = self.get_index_param()
 
         index_params.add_index(
+            field_name="vector",
+            index_name="vector_index",
             index_type=index_config["index_type"],
             metric_type=index_config["metric_type"],
-            field_name="vector",
-            index_name="vector_index"
+            params=index_config["params"]
         )
         self._client.create_index(self.collection_name, index_params)
 
@@ -202,24 +203,17 @@ class MilvusFLAT(Milvus):
     def get_index_param(self):
         return {
             "index_type": "FLAT",
-            "metric_type": self._metric_type
+            "metric_type": self._metric_type,
+            "params": {}
         }
 
-    def query(self, v, n):
+    def set_query_arguments(self, _ignore):
         self.search_params = {
+            "index_type": "FLAT",
             "metric_type": self._metric_type,
         }
 
-        results = self._client.search(
-            collection_name=self.collection_name,
-            data=[v],
-            anns_field="vector",
-            search_param=self.search_params,
-            limit=n,
-            output_fields=["id"]
-        )
-        ids = [r["id"] for r in results[0]]
-        return ids
+        self.name = f"MilvusFLAT metric:{self._metric}"
 
 
 class MilvusIVFFLAT(Milvus):
@@ -238,6 +232,7 @@ class MilvusIVFFLAT(Milvus):
 
     def set_query_arguments(self, nprobe):
         self.search_params = {
+            "index_type": "IVF_FLAT",
             "metric_type": self._metric_type,
             "params": {"nprobe": nprobe}
         }
@@ -346,7 +341,8 @@ class MilvusDISKANN(Milvus):
     def get_index_param(self):
         return {
             "index_type": "DISKANN",
-            "metric_type": self._metric_type
+            "metric_type": self._metric_type,
+            "params": {}
         }
 
     def set_query_arguments(self, search_list):

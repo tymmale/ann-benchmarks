@@ -10,6 +10,7 @@ float:
         FLAT:
           args:
             placeholder: [0]
+          query_args: [[0]]
     - base_args: ["@metric", "@dimension"]
       constructor: MilvusIVFFLAT
       disabled: false
