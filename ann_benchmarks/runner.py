@@ -206,6 +206,20 @@ function"""
     X_train, X_test, distance = load_and_transform_dataset(dataset_name)
 
     try:
+        start_time = time.time()
+
+        # Record resource usage
+        algorithm_arguments = ""
+        for entry in definition.arguments:
+            if isinstance(entry, dict):
+                for key, value in entry.items():
+                    algorithm_arguments += f"_{key}_{value}"
+
+        if not os.path.exists("results/nmon"):
+            os.mkdir("results/nmon")
+
+        os.system(f"nmon -ft -s 30 -c 2880 -F results/nmon/{definition.constructor}_{dataset_name}{algorithm_arguments}.nmon")
+
         if hasattr(algo, "supports_prepared_queries"):
             algo.supports_prepared_queries()
 
@@ -226,6 +240,14 @@ function"""
                 "algo": definition.algorithm,
                 "dataset": dataset_name
             })
+
+            end_time = time.time()
+
+            print(f"[Runner] Run for {definition.algorithm} and arguments {definition.arguments} "
+                  f"took {end_time - start_time} seconds.")
+
+            # Terminate recording
+            os.system("pkill nmon")
 
             store_results(dataset_name, count, definition, query_arguments, descriptor, results, batch)
     finally:
