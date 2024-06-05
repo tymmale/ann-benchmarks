@@ -50,13 +50,13 @@ def epsilon(dataset_distances, run_distances, count, metrics, epsilon=0.01):
     return metrics[s]
 
 
-def rel(dataset_distances, run_distances, metrics):
+def rel(dataset_distances, run_distances, count, metrics):
     if "rel" not in metrics.attrs:
         print("Computing rel metrics")
         total_closest_distance = 0.0
         total_candidate_distance = 0.0
         for true_distances, found_distances in zip(dataset_distances, run_distances):
-            total_closest_distance += np.sum(true_distances)
+            total_closest_distance += np.sum(true_distances[:count])
             total_candidate_distance += np.sum(found_distances)
         if total_closest_distance < 0.01:
             metrics.attrs["rel"] = float("inf")
@@ -136,7 +136,7 @@ all_metrics = {
     "rel": {
         "description": "Relative Error",
         "function": lambda true_distances, run_distances, metrics, times, run_attrs: rel(
-            true_distances, run_distances, metrics
+            true_distances, run_distances, run_attrs["count"], metrics
         ),  # noqa
         "worst": float("inf"),
     },
