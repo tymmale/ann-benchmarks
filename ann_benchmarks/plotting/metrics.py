@@ -177,6 +177,7 @@ all_metrics = {
             "mean"
         ],  # noqa
         "worst": float("-inf"),
+        "lim": [0.0, 1.03],
     },
     "qps": {
         "description": "Queries per second (1/s)",
