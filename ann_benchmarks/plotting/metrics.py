@@ -67,6 +67,35 @@ def rel(dataset_distances, run_distances, count, metrics):
     return metrics.attrs["rel"]
 
 
+def get_precision_value(dataset_distances, run_distances, count):
+    results = np.zeros(len(run_distances))
+    for index in range(len(run_distances)):
+        threshold_value = dataset_distances[index][count - 1]
+        true_positives = 0
+        false_positive = 0
+        for entry in run_distances[index][:count]:
+            if entry <= threshold_value:
+                true_positives += 1
+            else:
+                false_positive += 1
+        results[index] = (true_positives / (true_positives + false_positive))
+    return (np.mean(results), np.std(results), results)
+
+
+def precision(dataset_distances, run_distances, count, metrics):
+    metric_name = "precision"
+    if metric_name not in metrics.attrs:
+        print(f"Computing {metric_name} metrics")
+        precision_metrics = metrics.create_group(metric_name)
+        mean, std, results = get_precision_value(dataset_distances, run_distances, count)
+        precision_metrics.attrs["mean"] = mean
+        precision_metrics.attrs["std"] = std
+        precision_metrics["precisions"] = results
+    else:
+        print("Found cached result")
+    return metrics[metric_name]
+
+
 def queries_per_second(queries, attrs):
     return 1.0 / attrs["best_search_time"]
 
@@ -139,6 +168,15 @@ all_metrics = {
             true_distances, run_distances, run_attrs["count"], metrics
         ),  # noqa
         "worst": float("inf"),
+    },
+    "precision": {
+        "description": "Precision",
+        "function": lambda true_distances, run_distances, metrics, times, run_attrs: precision(
+            true_distances, run_distances, run_attrs["count"], metrics
+        ).attrs[
+            "mean"
+        ],  # noqa
+        "worst": float("-inf"),
     },
     "qps": {
         "description": "Queries per second (1/s)",
