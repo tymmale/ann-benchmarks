@@ -96,6 +96,35 @@ def precision(dataset_distances, run_distances, count, metrics):
     return metrics[metric_name]
 
 
+def get_true_recall_values(dataset_distances, run_distances, count):
+    results = np.zeros(len(run_distances))
+    for index in range(len(run_distances)):
+        threshold_value = dataset_distances[index][count - 1]
+        true_positives = 0
+        false_positives = 0
+        for d in run_distances[index][:count]:
+            if d <= threshold_value:
+                true_positives += 1
+            else:
+                false_positives += 1
+        results[index] = (true_positives / (false_positives + count))
+    return (np.mean(results), np.std(results), results)
+
+
+def true_recall(dataset_distances, run_distances, count, metrics):
+    metric_name = "recall"
+    if metric_name not in metrics:
+        print(f"Computing {metric_name} metrics")
+        recall_metrics = metrics.create_group(metric_name)
+        mean, std, results = get_true_recall_values(dataset_distances, run_distances, count)
+        recall_metrics.attrs["mean"] = mean
+        recall_metrics.attrs["std"] = std
+        recall_metrics["recalls"] = results
+    else:
+        print("Found cached result")
+    return metrics[metric_name]
+
+
 def queries_per_second(queries, attrs):
     return 1.0 / attrs["best_search_time"]
 
@@ -172,6 +201,16 @@ all_metrics = {
     "precision": {
         "description": "Precision",
         "function": lambda true_distances, run_distances, metrics, times, run_attrs: precision(
+            true_distances, run_distances, run_attrs["count"], metrics
+        ).attrs[
+            "mean"
+        ],  # noqa
+        "worst": float("-inf"),
+        "lim": [0.0, 1.03],
+    },
+    "recall": {
+        "description": "True recall",
+        "function": lambda true_distances, run_distances, metrics, times, run_attrs: true_recall(
             true_distances, run_distances, run_attrs["count"], metrics
         ).attrs[
             "mean"
