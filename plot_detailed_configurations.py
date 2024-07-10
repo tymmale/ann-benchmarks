@@ -135,15 +135,7 @@ if __name__ == "__main__":
     count = int(args.count)
     unique_algorithms = get_unique_algorithms()
     results = load_all_results(args.dataset, count, args.batch)
-    # linestyles = create_linestyles(sorted(unique_algorithms))
     runs = compute_metrics(np.array(dataset["distances"]), results, args.x_axis, args.y_axis, args.recompute)
-
-    # algo_names = []
-    # for key in runs.keys():
-    #     for entry in runs[key]:
-    #         algo_names.append(entry[1])
-    #
-    # linestyles = create_linestyles(algo_names)
 
     if not runs:
         raise Exception("Nothing to plot")
