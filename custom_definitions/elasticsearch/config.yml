@@ -1,47 +1,36 @@
-float:
+scfloat:
   angular:
-  - base_args: ['@metric']
-    constructor: PGVectorIVFFLAT
+  - base_args: ['@metric', '@dimension']
+    constructor: ElasticsearchKNN
     disabled: false
-    docker_tag: ann-benchmarks-pgvector
-    module: ann_benchmarks.algorithms.pgvector
-    name: pgvector-ivfflat
-    run_groups:
-      IVFFLAT:
-        args:
-          nlist: [1024, 2048, 4096, 8192]
-        query_args: [[50, 100, 200]]
-  - base_args: ['@metric']
-    constructor: PGVectorHNSW
-    disabled: false
-    docker_tag: ann-benchmarks-pgvector
-    module: ann_benchmarks.algorithms.pgvector
-    name: pgvector-hnsw
+    docker_tag: ann-benchmarks-elasticsearch
+    module: ann_benchmarks.algorithms.elasticsearch
+    name: elasticsearch
     run_groups:
       M-8-ef-200:
-        arg_groups: [{M: 8, efConstruction: 200}]
-        args: {}
-        query_args: [[40, 80, 120, 200, 400]]
+        arg_groups: [ { M: 8, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-12-ef-200:
-        arg_groups: [{M: 12,efConstruction: 200}]
-        args: {}
-        query_args: [[40, 80, 120, 200, 400]]
+        arg_groups: [ { M: 12,efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-16-ef-200:
-        arg_groups: [{M: 16, efConstruction: 200}]
-        args: {}
-        query_args: [[40, 80, 120, 200, 400]]
+        arg_groups: [ { M: 16, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-24-ef-200:
-        arg_groups: [{M: 24, efConstruction: 200}]
-        args: {}
-        query_args: [[40, 80, 120, 200, 400]]
+        arg_groups: [ { M: 24, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-36-ef-200:
-        arg_groups: [{ M: 36, efConstruction: 200}]
-        args: {}
-        query_args: [[40, 80, 120, 200, 400]]
+        arg_groups: [ { M: 36, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-48-ef-200:
-        arg_groups: [{ M: 48, efConstruction: 200}]
-        args: {}
-        query_args: [[40, 80, 120, 200, 400]]
+        arg_groups: [ { M: 48, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-8-ef-500:
         arg_groups: [ { M: 8, efConstruction: 500 } ]
         args: { }
@@ -67,40 +56,29 @@ float:
         args: { }
         query_args: [ [ 40, 80, 120, 200, 400 ] ]
   euclidean:
-    - base_args: [ '@metric' ]
-      constructor: PGVectorIVFFLAT
+    - base_args: [ '@metric', '@dimension' ]
+      constructor: ElasticsearchKNN
       disabled: false
-      docker_tag: ann-benchmarks-pgvector
-      module: ann_benchmarks.algorithms.pgvector
-      name: pgvector-ivfflat
-      run_groups:
-        IVFFLAT:
-          args:
-            nlist: [512, 1024, 2048, 4096, 8192 ]
-          query_args: [ [ 5, 10, 50, 100 ] ]
-    - base_args: [ '@metric' ]
-      constructor: PGVectorHNSW
-      disabled: false
-      docker_tag: ann-benchmarks-pgvector
-      module: ann_benchmarks.algorithms.pgvector
-      name: pgvector-hnsw
+      docker_tag: ann-benchmarks-elasticsearch
+      module: ann_benchmarks.algorithms.elasticsearch
+      name: elasticsearch
       run_groups:
         M-8-ef-200:
           arg_groups: [ { M: 8, efConstruction: 200 } ]
           args: { }
-          query_args: [ [ 20, 40, 80, 120, 200, 400] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-12-ef-200:
           arg_groups: [ { M: 12,efConstruction: 200 } ]
           args: { }
-          query_args: [ [ 20, 40, 80, 120, 200, 400] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-16-ef-200:
           arg_groups: [ { M: 16, efConstruction: 200 } ]
           args: { }
-          query_args: [ [ 20, 40, 80, 120, 200, 400] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-24-ef-200:
           arg_groups: [ { M: 24, efConstruction: 200 } ]
           args: { }
-          query_args: [ [ 20, 40, 80, 120, 200, 400] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-36-ef-200:
           arg_groups: [ { M: 36, efConstruction: 200 } ]
           args: { }
@@ -108,7 +86,7 @@ float:
         M-48-ef-200:
           arg_groups: [ { M: 48, efConstruction: 200 } ]
           args: { }
-          query_args: [ [20, 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-8-ef-500:
           arg_groups: [ { M: 8, efConstruction: 500 } ]
           args: { }
@@ -133,5 +111,3 @@ float:
           arg_groups: [ { M: 48, efConstruction: 500 } ]
           args: { }
           query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
-
-
