@@ -123,4 +123,4 @@ class ElasticsearchKNN(BaseANN):
         return self.batch_res
 
     def __str__(self):
-        return f"Elasticsearch(index_options: {self.index_options}, num_canditates: {self.num_candidates})"
+        return f"Elasticsearch(index_options:{self.index_options}, num_canditates:{self.num_candidates})"

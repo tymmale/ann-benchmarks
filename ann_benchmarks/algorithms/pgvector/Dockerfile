@@ -2,7 +2,7 @@ FROM ann-benchmarks
 
 # https://github.com/pgvector/pgvector/blob/master/Dockerfile
 
-RUN git clone https://github.com/pgvector/pgvector /tmp/pgvector
+RUN git clone --branch v0.7.2  https://github.com/pgvector/pgvector /tmp/pgvector
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential postgresql-common
@@ -31,7 +31,7 @@ RUN service postgresql start && \
     psql -c "GRANT ALL PRIVILEGES ON DATABASE ann TO ann" && \
     psql -d ann -c "GRANT ALL ON SCHEMA public TO ann" && \
     psql -d ann -c "CREATE EXTENSION vector" && \
-    psql -c "ALTER USER ann SET maintenance_work_mem = '4GB'" && \
+    psql -c "ALTER USER ann SET maintenance_work_mem = '16GB'" && \
     psql -c "ALTER USER ann SET max_parallel_maintenance_workers = 0" && \
     psql -c "ALTER SYSTEM SET shared_buffers = '4GB'"
 USER root

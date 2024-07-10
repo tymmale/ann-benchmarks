@@ -12,7 +12,7 @@ from ..base.module import BaseANN
 class Weaviate(BaseANN):
     def __init__(self, metric, max_connections, ef_construction=512):
         self.class_name = "Vector"
-        self.client = weaviate.Client(embedded_options=EmbeddedOptions(version="1.19.0-beta.1"))
+        self.client = weaviate.Client(embedded_options=EmbeddedOptions(version="1.25.6"))
         self.max_connections = max_connections
         self.ef_construction = ef_construction
         self.distance = {
@@ -72,4 +72,4 @@ class Weaviate(BaseANN):
         return [uuid.UUID(res["_additional"]["id"]).int for res in ret["data"]["Get"][self.class_name]]
 
     def __str__(self):
-        return f"Weaviate(ef={self.ef}, maxConnections={self.max_connections}, efConstruction={self.ef_construction})"
+        return f"Weaviate(ef:{self.ef}, max_connections:{self.max_connections}, ef_construction:{self.ef_construction})"

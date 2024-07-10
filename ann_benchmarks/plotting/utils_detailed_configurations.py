@@ -19,12 +19,12 @@ def create_pointset(data, xn, yn):
     rev_x = -1 if xm["worst"] < 0 else 1
     data.sort(key=lambda t: (rev_y * t[-1], rev_x * t[-2]))
 
-    axs, ays, als, b_params = [], [], [], []
+    axs, ays, als = [], [], []
     # Generate Pareto frontier
     xs, ys, ls = [], [], []
     last_x = xm["worst"]
     comparator = (lambda xv, lx: xv > lx) if last_x < 0 else (lambda xv, lx: xv < lx)
-    for algo, algo_name, build_params, xv, yv in data:
+    for algo, algo_name, xv, yv in data:
         if not xv or not yv:
             continue
         axs.append(xv)
@@ -36,7 +36,6 @@ def create_pointset(data, xn, yn):
             ys.append(yv)
             ls.append(algo_name)
 
-        b_params.append(build_params)
     return xs, ys, ls, axs, ays, als
 
 
@@ -45,7 +44,6 @@ def compute_metrics(true_nn_distances, res, metric_1, metric_2, recompute=False)
     for i, (properties, run) in enumerate(res):
         algo = properties["algo"]
         algo_name = properties["name"]
-        build_arguments = properties["build_arguments"] if "build_arguments" in properties else None
         # cache distances to avoid access to hdf5 file
         run_distances = np.array(run["distances"])
         # cache times to avoid access to hdf5 file
@@ -63,7 +61,7 @@ def compute_metrics(true_nn_distances, res, metric_1, metric_2, recompute=False)
 
         print("%3d: %80s %12.3f %12.3f" % (i, algo_name, metric_1_value, metric_2_value))
 
-        all_results.setdefault(algo, []).append((algo, algo_name, build_arguments, metric_1_value, metric_2_value))
+        all_results.setdefault(algo, []).append((algo, algo_name, metric_1_value, metric_2_value))
 
     return all_results
 

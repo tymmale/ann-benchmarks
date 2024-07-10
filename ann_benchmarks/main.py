@@ -9,6 +9,8 @@ import random
 import shutil
 import sys
 from typing import List
+import time
+from datetime import datetime
 
 import docker
 import psutil
@@ -260,6 +262,9 @@ def create_workers_and_execute(definitions: List[Definition], args: argparse.Nam
         logger.info("Terminating %d workers" % len(workers))
         [worker.terminate() for worker in workers]
 
+        end_time = time.time()
+        print(f"[Main] Benchmark completed at {datetime.fromtimestamp(end_time)}.")
+
 
 def filter_disabled_algorithms(definitions: List[Definition]) -> List[Definition]:
     """
@@ -299,7 +304,10 @@ def limit_algorithms(definitions: List[Definition], limit: int) -> List[Definiti
 
 def main():
     args = parse_arguments()
-
+    
+    start_time = time.time()
+    print(f"[Main] Benchmark starting at {datetime.fromtimestamp(start_time)}.")
+    
     if args.list_algorithms:
         list_algorithms(args.definitions)
         sys.exit(0)
