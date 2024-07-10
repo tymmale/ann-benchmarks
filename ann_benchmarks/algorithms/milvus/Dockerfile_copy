@@ -14,7 +14,7 @@ RUN echo \
     tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 RUN apt-get update 
-RUN apt-get install -y docker-ce-cli docker-compose-plugin
+RUN apt-get install -y wget docker-ce-cli docker-compose-plugin
 
 RUN pip3 install pymilvus==2.4.1
 RUN python3 -c "from pymilvus import Collection"
@@ -24,4 +24,6 @@ RUN wget https://github.com/milvus-io/milvus/releases/download/v2.4.1/milvus-sta
 RUN sed -i '/- ${DOCKER_VOLUME_DIRECTORY:-.}\/volumes\/milvus:\/var\/lib\/milvus/d' docker-compose.yml
 RUN sed -i '/- ${DOCKER_VOLUME_DIRECTORY:-.}\/volumes\/etcd:\/etcd/d' docker-compose.yml
 RUN sed -i '/- ${DOCKER_VOLUME_DIRECTORY:-.}\/volumes\/minio:\/minio_data/d' docker-compose.yml
-RUN sed -i '/volumes:/d' docker-compose.yml
+RUN sed -i '/container_name:/d' docker-compose.yml
+RUN sed -i 's|volumes:|network_mode: \"bridge\"|g'  docker-compose.yml
+RUN sed -i '/networks:/,+2d'  docker-compose.yml

@@ -1,3 +1,5 @@
+import random
+import string
 from time import sleep
 from pymilvus import DataType, connections, utility, Collection, CollectionSchema, FieldSchema, DataType
 import os
@@ -17,6 +19,7 @@ class Milvus(BaseANN):
         self._metric = metric
         self._dim = dim
         self._metric_type = metric_mapping(self._metric)
+        self.service_name = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.start_milvus()
         self.connects = connections
         max_trys = 10
@@ -37,14 +40,16 @@ class Milvus(BaseANN):
 
     def start_milvus(self):
         try:
-            os.system(f"docker compose up -d")
+            #os.system(f"docker compose -p {self.service_name} down -v")
+            os.system(f"docker compose -p {self.service_name} up -d")
+            print(self.service_name)
             print("[Milvus] docker compose up successfully!!!")
         except Exception as e:
             print(f"[Milvus] docker compose up failed: {e}!!!")
 
     def stop_milvus(self):
         try:
-            os.system(f"docker compose down ")
+            os.system(f"docker compose -p {self.service_name} down -v")
             print("[Milvus] docker compose down successfully!!!")
         except Exception as e:
             print(f"[Milvus] docker compose down failed: {e}!!!")
@@ -182,7 +187,7 @@ class MilvusIVFFLAT(Milvus):
             "metric_type": self._metric_type,
             "params": {"nprobe": nprobe}
         }
-        self.name = f"MilvusIVFFLAT metric:{self._metric}, nlist:{self._index_nlist}, nprobe:{nprobe}"
+        self.name = f"MilvusIVFFLAT metric:{self._metric}, index_nlist:{self._index_nlist}, search_nprobe:{nprobe}"
 
 
 class MilvusIVFSQ8(Milvus):
@@ -204,7 +209,7 @@ class MilvusIVFSQ8(Milvus):
             "metric_type": self._metric_type,
             "params": {"nprobe": nprobe}
         }
-        self.name = f"MilvusIVFSQ8 metric:{self._metric}, nlist:{self._index_nlist}, nprobe:{nprobe}"
+        self.name = f"MilvusIVFSQ8 metric:{self._metric}, index_nlist:{self._index_nlist}, search_nprobe:{nprobe}"
 
 
 class MilvusIVFPQ(Milvus):
@@ -231,7 +236,7 @@ class MilvusIVFPQ(Milvus):
             "metric_type": self._metric_type,
             "params": {"nprobe": nprobe}
         }
-        self.name = f"MilvusIVFPQ metric:{self._metric}, nlist:{self._index_nlist}, m:{self._index_m}, nbits:{self._index_nbits}, nprobe:{nprobe}"
+        self.name = f"MilvusIVFPQ metric:{self._metric}, index_nlist:{self._index_nlist}, search_nprobe:{nprobe}"
 
 
 class MilvusHNSW(Milvus):
@@ -255,7 +260,7 @@ class MilvusHNSW(Milvus):
             "metric_type": self._metric_type,
             "params": {"ef": ef}
         }
-        self.name = f"MilvusHNSW metric:{self._metric}, M:{self._index_m}, ef_construction:{self._index_ef}, ef:{ef}"
+        self.name = f"MilvusHNSW metric:{self._metric}, index_M:{self._index_m}, index_ef:{self._index_ef}, search_ef={ef}"
 
 
 class MilvusSCANN(Milvus):
@@ -277,4 +282,4 @@ class MilvusSCANN(Milvus):
             "metric_type": self._metric_type,
             "params": {"nprobe": nprobe}
         }
-        self.name = f"MilvusSCANN metric:{self._metric}, nlist:{self._index_nlist}, nprobe:{nprobe}"
+        self.name = f"MilvusSCANN metric:{self._metric}, index_nlist:{self._index_nlist}, search_nprobe:{nprobe}"

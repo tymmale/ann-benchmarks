@@ -354,42 +354,21 @@ def run_docker(
     client = docker.from_env()
     if mem_limit is None:
         mem_limit = psutil.virtual_memory().available
-    
-    should_run_in_host_mode = "milvus" in definition.algorithm
 
-    if should_run_in_host_mode:
-        container = client.containers.run(
-            definition.docker_tag,
-            cmd,
-            volumes={
-                os.path.abspath("/var/run/docker.sock"): {"bind": "/var/run/docker.sock", "mode": "rw"},
-                os.path.abspath("ann_benchmarks"): {"bind": "/home/app/ann_benchmarks", "mode": "ro"},
-                os.path.abspath("data"): {"bind": "/home/app/data", "mode": "ro"},
-                os.path.abspath("results"): {"bind": "/home/app/results", "mode": "rw"},
-            },
-            network_mode="host",
-            cpuset_cpus=cpu_limit,
-            mem_limit=mem_limit,
-            detach=True,
-        )
-    else:
-        network_name = f"{definition.algorithm}_{uuid.uuid4()}"
-        network = client.networks.create(network_name, driver="bridge")
-
-        container = client.containers.run(
-            definition.docker_tag,
-            cmd,
-            volumes={
-                os.path.abspath("/var/run/docker.sock"): {"bind": "/var/run/docker.sock", "mode": "rw"},
-                os.path.abspath("ann_benchmarks"): {"bind": "/home/app/ann_benchmarks", "mode": "ro"},
-                os.path.abspath("data"): {"bind": "/home/app/data", "mode": "ro"},
-                os.path.abspath("results"): {"bind": "/home/app/results", "mode": "rw"},
-            },
-            network=network_name,
-            cpuset_cpus=cpu_limit,
-            mem_limit=mem_limit,
-            detach=True,
-        )
+    container = client.containers.run(
+        definition.docker_tag,
+        cmd,
+        volumes={
+            os.path.abspath("/var/run/docker.sock"): {"bind": "/var/run/docker.sock", "mode": "rw"},
+            os.path.abspath("ann_benchmarks"): {"bind": "/home/app/ann_benchmarks", "mode": "ro"},
+            os.path.abspath("data"): {"bind": "/home/app/data", "mode": "ro"},
+            os.path.abspath("results"): {"bind": "/home/app/results", "mode": "rw"},
+        },
+        network_mode="host",
+        cpuset_cpus=cpu_limit,
+        mem_limit=mem_limit,
+        detach=True,
+    )
     logger = logging.getLogger(f"annb.{container.short_id}")
 
     logger.info(
@@ -399,7 +378,7 @@ def run_docker(
 
     def stream_logs():
         for line in container.logs(stream=True):
-            logger.info(line.decode().rstrip())
+            logger.info(colors.color(line.decode().rstrip(), fg="blue"))
 
     t = threading.Thread(target=stream_logs, daemon=True)
     t.start()
@@ -413,8 +392,6 @@ def run_docker(
     finally:
         logger.info("Removing container")
         container.remove(force=True)
-        if not should_run_in_host_mode:
-            network.remove()
 
 
 def _handle_container_return_value(

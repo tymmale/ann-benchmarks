@@ -7,7 +7,7 @@ WORKDIR /home/app
 COPY requirements.txt .
 
 RUN apt-get update \
- && apt-get install -y python3-pip build-essential python3-h5py \
+ && apt-get install -y python3-pip build-essential python3-h5py nmon \
  && python3 -m pip install --break-system-packages --upgrade pip setuptools wheel \
  && python3 -m pip install --break-system-packages -r requirements.txt \
  && python3 -m pip install --break-system-packages qdrant-client==${QDRANT_CLIENT_VERSION}

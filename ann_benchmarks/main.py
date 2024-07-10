@@ -9,6 +9,8 @@ import random
 import shutil
 import sys
 from typing import List
+import time
+from datetime import datetime
 
 import docker
 import psutil
@@ -92,10 +94,6 @@ def parse_arguments() -> argparse.Namespace:
         "--definitions", metavar="FOLDER", help="base directory of algorithms. Algorithm definitions expected at 'FOLDER/*/config.yml'", default="ann_benchmarks/algorithms"
     )
     parser.add_argument("--algorithm", metavar="NAME", help="run only the named algorithm", default=None)
-    parser.add_argument("--run-group",
-                        help="run all algorithms that belong to the provided algorithm",
-                        action="store_true"
-                        )
     parser.add_argument(
         "--docker-tag", metavar="NAME", help="run only algorithms in a particular docker image", default=None
     )
@@ -264,6 +262,9 @@ def create_workers_and_execute(definitions: List[Definition], args: argparse.Nam
         logger.info("Terminating %d workers" % len(workers))
         [worker.terminate() for worker in workers]
 
+        end_time = time.time()
+        print(f"[Main] Benchmark completed at {datetime.fromtimestamp(end_time)}.")
+
 
 def filter_disabled_algorithms(definitions: List[Definition]) -> List[Definition]:
     """
@@ -303,7 +304,10 @@ def limit_algorithms(definitions: List[Definition], limit: int) -> List[Definiti
 
 def main():
     args = parse_arguments()
-
+    
+    start_time = time.time()
+    print(f"[Main] Benchmark starting at {datetime.fromtimestamp(start_time)}.")
+    
     if args.list_algorithms:
         list_algorithms(args.definitions)
         sys.exit(0)
@@ -329,11 +333,8 @@ def main():
     )
 
     if args.algorithm:
-        logger.info(f"running only {args.algorithm} group")
-        if args.run_group:
-            definitions = [d for d in definitions if args.algorithm in d.algorithm]
-        else:
-            definitions = [d for d in definitions if d.algorithm == args.algorithm]
+        logger.info(f"running only {args.algorithm}")
+        definitions = [d for d in definitions if d.algorithm == args.algorithm]
 
     if not args.local:
         definitions = filter_by_available_docker_images(definitions)

@@ -2,6 +2,7 @@ FROM almalinux:8
 
 RUN dnf -y install epel-release && \
     dnf -y install dnf-plugins-core && \
+    dnf -y install nmon && \
     dnf -y install \
         gcc \
         make \
