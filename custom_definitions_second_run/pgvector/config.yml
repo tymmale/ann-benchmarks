@@ -18,6 +18,18 @@ float:
     module: ann_benchmarks.algorithms.pgvector
     name: pgvector-hnsw
     run_groups:
+      M-1-ef-200:
+        arg_groups: [ { M: 1, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
+      M-2-ef-200:
+        arg_groups: [ { M: 2, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
+      M-4-ef-200:
+        arg_groups: [ { M: 4, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-8-ef-200:
         arg_groups: [{M: 8, efConstruction: 200}]
         args: {}
@@ -42,6 +54,18 @@ float:
         arg_groups: [{ M: 48, efConstruction: 200}]
         args: {}
         query_args: [[40, 80, 120, 200, 400]]
+      M-1-ef-500:
+        arg_groups: [ { M: 1, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
+      M-2-ef-500:
+        arg_groups: [ { M: 2, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
+      M-4-ef-500:
+        arg_groups: [ { M: 4, efConstruction: 200 } ]
+        args: { }
+        query_args: [ [ 40, 80, 120, 200, 400 ] ]
       M-8-ef-500:
         arg_groups: [ { M: 8, efConstruction: 500 } ]
         args: { }
@@ -85,6 +109,18 @@ float:
       module: ann_benchmarks.algorithms.pgvector
       name: pgvector-hnsw
       run_groups:
+        M-1-ef-200:
+          arg_groups: [ { M: 1, efConstruction: 200 } ]
+          args: { }
+          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+        M-2-ef-200:
+          arg_groups: [ { M: 2, efConstruction: 200 } ]
+          args: { }
+          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+        M-4-ef-200:
+          arg_groups: [ { M: 4, efConstruction: 200 } ]
+          args: { }
+          query_args: [ [ 40, 80, 120, 200, 400 ] ]
         M-8-ef-200:
           arg_groups: [ { M: 8, efConstruction: 200 } ]
           args: { }
@@ -109,6 +145,18 @@ float:
           arg_groups: [ { M: 48, efConstruction: 200 } ]
           args: { }
           query_args: [ [20, 40, 80, 120, 200, 400 ] ]
+        M-1-ef-500:
+          arg_groups: [ { M: 1, efConstruction: 200 } ]
+          args: { }
+          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+        M-2-ef-500:
+          arg_groups: [ { M: 2, efConstruction: 200 } ]
+          args: { }
+          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+        M-4-ef-500:
+          arg_groups: [ { M: 4, efConstruction: 200 } ]
+          args: { }
+          query_args: [ [ 40, 80, 120, 200, 400 ] ]
         M-8-ef-500:
           arg_groups: [ { M: 8, efConstruction: 500 } ]
           args: { }
