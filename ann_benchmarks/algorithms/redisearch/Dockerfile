@@ -1,4 +1,4 @@
-FROM redislabs/redisearch:2.8.8 as redisearch
+FROM redislabs/redisearch:2.8.8 AS redisearch
 FROM ann-benchmarks
 
 # Install Redis
