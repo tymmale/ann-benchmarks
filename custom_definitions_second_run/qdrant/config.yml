@@ -11,7 +11,7 @@ float:
         args: [
           ['none', 'scalar', 'binary'], #quantization
           [1, 2, 4, 8, 12, 16, 24, 36, 48], #m
-          [ 200, 500 ], #ef_construct
+         [ 128, 256, 512 ], #ef_construct
         ]
         query_args: [
           [null, 40, 80, 120, 200, 400], #hnsw_ef
@@ -29,7 +29,7 @@ float:
             args: [
               [ 'none', 'scalar', 'binary' ], #quantization
               [1, 2, 4, 8, 12, 16, 24, 36, 48], #m
-              [ 200, 500 ], #ef_construct
+              [ 128, 256, 512 ], #ef_construct
             ]
             query_args: [
               [ null, 20, 40, 80, 120, 200, 400 ], #hnsw_ef

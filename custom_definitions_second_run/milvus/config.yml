@@ -54,7 +54,7 @@ float:
         HNSW:
           args:
             M: [1, 2, 4, 8, 12, 16, 24, 36, 48]
-            efConstruction: [200, 500]
+            efConstruction: [ 128, 256, 512 ]
           query_args: [[40, 80, 120, 200, 400]]
     - base_args: ["@metric", "@dimension"]
       constructor: MilvusSCANN
@@ -122,7 +122,7 @@ float:
         HNSW:
           args:
             M: [1, 2, 4, 8, 12, 16, 24, 36, 48]
-            efConstruction: [200, 500 ]
+            efConstruction: [ 128, 256, 512 ]
           query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
     - base_args: [ "@metric", "@dimension" ]
       constructor: MilvusSCANN

@@ -8,7 +8,7 @@ float:
     name: weaviate-hnsw
     run_groups:
       weaviate:
-        args: [[1, 2, 4, 8, 12, 16, 24, 36, 48], [200, 500]]
+        args: [[1, 2, 4, 8, 12, 16, 24, 36, 48], [ 128, 256, 512 ]]
         query_args: [[40, 80, 120, 200, 400]]
   euclidean:
     - base_args: [ '@metric' ]
@@ -19,5 +19,5 @@ float:
       name: weaviate-hnsw
       run_groups:
         weaviate:
-          args: [[1, 2, 4, 8, 12, 16, 24, 36, 48], [ 200, 500 ]]
+          args: [[1, 2, 4, 8, 12, 16, 24, 36, 48], [ 128, 256, 512 ]]
           query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
