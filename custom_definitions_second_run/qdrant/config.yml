@@ -10,7 +10,7 @@ float:
       default:
         args: [
           ['none', 'scalar', 'binary'], #quantization
-          [8, 12, 16, 24, 36, 48], #m
+          [1, 2, 4, 8, 12, 16, 24, 36, 48], #m
           [ 200, 500 ], #ef_construct
         ]
         query_args: [
@@ -28,7 +28,7 @@ float:
           default:
             args: [
               [ 'none', 'scalar', 'binary' ], #quantization
-              [8, 12, 16, 24, 36, 48], #m
+              [1, 2, 4, 8, 12, 16, 24, 36, 48], #m
               [ 200, 500 ], #ef_construct
             ]
             query_args: [
