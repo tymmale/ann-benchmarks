@@ -5,7 +5,7 @@ float:
     disabled: false
     docker_tag: ann-benchmarks-weaviate
     module: ann_benchmarks.algorithms.weaviate
-    name: weaviate
+    name: weaviate-hnsw
     run_groups:
       weaviate:
         args: [[ 8, 12, 16, 24, 36, 48], [200, 500]]
@@ -16,7 +16,7 @@ float:
       disabled: false
       docker_tag: ann-benchmarks-weaviate
       module: ann_benchmarks.algorithms.weaviate
-      name: weaviate
+      name: weaviate-hnsw
       run_groups:
         weaviate:
           args: [[ 8, 12, 16, 24, 36, 48 ], [ 200, 500 ]]
