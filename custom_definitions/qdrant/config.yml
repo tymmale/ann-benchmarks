@@ -5,7 +5,7 @@ float:
     disabled: false
     docker_tag: ann-benchmarks-qdrant
     module: ann_benchmarks.algorithms.qdrant
-    name: qdrant
+    name: qdrant-hnsw
     run_groups:
       default:
         args: [
@@ -23,7 +23,7 @@ float:
         disabled: false
         docker_tag: ann-benchmarks-qdrant
         module: ann_benchmarks.algorithms.qdrant
-        name: qdrant
+        name: qdrant-hnsw
         run_groups:
           default:
             args: [

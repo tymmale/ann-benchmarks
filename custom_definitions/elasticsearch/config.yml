@@ -5,7 +5,7 @@ scfloat:
     disabled: false
     docker_tag: ann-benchmarks-elasticsearch
     module: ann_benchmarks.algorithms.elasticsearch
-    name: elasticsearch
+    name: elasticsearch-hnsw
     run_groups:
       M-8-ef-200:
         arg_groups: [ { M: 8, efConstruction: 200 } ]
@@ -61,7 +61,7 @@ scfloat:
       disabled: false
       docker_tag: ann-benchmarks-elasticsearch
       module: ann_benchmarks.algorithms.elasticsearch
-      name: elasticsearch
+      name: elasticsearch-hnsw
       run_groups:
         M-8-ef-200:
           arg_groups: [ { M: 8, efConstruction: 200 } ]
