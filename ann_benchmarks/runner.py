@@ -197,13 +197,13 @@ def build_index(algo: BaseANN, X_train: numpy.ndarray) -> Tuple:
     return build_time, index_size
 
 
-def run(definition: Definition, dataset_name: str, count: int, run_count: int, batch: bool) -> None:
+def run(definition: Definition, dataset_name: str, counts: list[int], run_count: int, batch: bool) -> None:
     """Run the algorithm benchmarking.
 
     Args:
         definition (Definition): The algorithm definition.
         dataset_name (str): The name of the dataset.
-        count (int): The number of results to return.
+        counts (int): The number of results to return.
         run_count (int): The number of runs.
         batch (bool): If true, runs in batch mode.
     """
@@ -231,12 +231,15 @@ function"""
         if not os.path.exists("results/nmon"):
             os.mkdir("results/nmon")
 
-        process = subprocess.Popen(["nmon", "-ft", "-s", "1", "-c", "86400", "-F",
-                                    f"results/nmon/{definition.constructor}_{dataset_name}{algorithm_arguments}_k_{count}.nmon"])
+        process = subprocess.Popen(["nmon", "-Ft", "-s", "1", "-c", "86400",
+                                    f"results/nmon/{definition.constructor}_{dataset_name}{algorithm_arguments}_insertion+building_index.nmon"])
         if hasattr(algo, "supports_prepared_queries"):
             algo.supports_prepared_queries()
 
         build_time, index_size = build_index(algo, X_train)
+
+        # Terminate recording
+        process.kill()
 
         query_argument_groups = definition.query_argument_groups or [[]]  # Ensure at least one iteration
 
@@ -244,26 +247,32 @@ function"""
             print(f"Running query argument group {pos} of {len(query_argument_groups)}...")
             if query_arguments:
                 algo.set_query_arguments(*query_arguments)
-            
-            descriptor, results = run_individual_query(algo, X_train, X_test, distance, count, run_count, batch)
 
-            descriptor.update({
-                "build_time": build_time,
-                "index_size": index_size,
-                "algo": definition.algorithm,
-                "dataset": dataset_name
-            })
+            for entry in counts:
+                print(f"Running k={entry}")
+                entry = int(entry)
+                process = subprocess.Popen(["nmon", "-s", "1", "-c", "86400", "-tF",
+                                            f"results/nmon/{definition.constructor}_{dataset_name}{algorithm_arguments}_querying_k_{entry}.nmon"])
 
-            end_time = time.time()
-            print(f"[Runner] Run for {definition.algorithm} and arguments {definition.arguments} "
-                  f"took {end_time - start_time} seconds.")
+                descriptor, results = run_individual_query(algo, X_train, X_test, distance, entry, run_count, batch)
 
-            print(f"Ending benchmark for {definition.algorithm} and arguments {definition.arguments} at {datetime.fromtimestamp(end_time)}")
+                descriptor.update({
+                    "build_time": build_time,
+                    "index_size": index_size,
+                    "algo": definition.algorithm,
+                    "dataset": dataset_name
+                })
 
-            # Terminate recording
-            process.kill()
+                end_time = time.time()
+                print(f"[Runner] Run for {definition.algorithm} and arguments {definition.arguments} "
+                      f"took {end_time - start_time} seconds.")
 
-            store_results(dataset_name, count, definition, query_arguments, descriptor, results, batch)
+                print(f"Ending benchmark for {definition.algorithm} and arguments {definition.arguments} at {datetime.fromtimestamp(end_time)}")
+
+                # Terminate recording
+                process.kill()
+
+                store_results(dataset_name, entry, definition, query_arguments, descriptor, results, batch)
     finally:
         algo.done()
 
@@ -285,7 +294,7 @@ def run_from_cmdline():
     )
     parser.add_argument("--constructor", help='Constructer to load from modulel. E.g. "Annoy"', required=True)
     parser.add_argument(
-        "--count", help="K: Number of nearest neighbours for the algorithm to return.", required=True, type=int
+        "--count", help="K: Number of nearest neighbours for the algorithm to return.", required=True,
     )
     parser.add_argument(
         "--runs",
@@ -315,13 +324,14 @@ def run_from_cmdline():
         query_argument_groups=query_args,
         disabled=False,
     )
-    run(definition, args.dataset, args.count, args.runs, args.batch)
+    counts = args.count.split(" ")
+    run(definition, args.dataset, counts, args.runs, args.batch)
 
 
 def run_docker(
     definition: Definition,
     dataset: str,
-    count: int,
+    counts: list[int],
     runs: int,
     timeout: int,
     batch: bool,
@@ -343,13 +353,14 @@ def run_docker(
         definition.constructor,
         "--runs",
         str(runs),
-        "--count",
-        str(count),
     ]
     if batch:
         cmd += ["--batch"]
     cmd.append(json.dumps(definition.arguments))
     cmd += [json.dumps(qag) for qag in definition.query_argument_groups]
+    cmd += ["--count"]
+    count_string = " ".join(str(entry) for entry in counts)
+    cmd += [count_string]
 
     client = docker.from_env()
     if mem_limit is None:

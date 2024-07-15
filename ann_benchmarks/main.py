@@ -69,7 +69,8 @@ def run_worker(cpu: int, args: argparse.Namespace, queue: multiprocessing.Queue)
     while not queue.empty():
         definition = queue.get()
         if args.local:
-            run(definition, args.dataset, args.count, args.runs, args.batch)
+            counts = args.count.split(" ")
+            run(definition, args.dataset, counts, args.runs, args.batch)
         else:
             memory_margin = 500e6  # reserve some extra memory for misc stuff
             mem_limit = int((psutil.virtual_memory().available - memory_margin) / args.parallelism)
@@ -88,7 +89,7 @@ def parse_arguments() -> argparse.Namespace:
         choices=DATASETS.keys(),
     )
     parser.add_argument(
-        "-k", "--count", default=10, type=positive_int, help="the number of near neighbours to search for"
+        "-k", "--count", nargs="*", default=[10], type=positive_int, help="the number of near neighbours to search for"
     )
     parser.add_argument(
         "--definitions", metavar="FOLDER", help="base directory of algorithms. Algorithm definitions expected at 'FOLDER/*/config.yml'", default="ann_benchmarks/algorithms"
