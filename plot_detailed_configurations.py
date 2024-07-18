@@ -13,7 +13,7 @@ from ann_benchmarks.plotting.utils_detailed_configurations import (compute_metri
 from ann_benchmarks.results import get_unique_algorithms, load_all_results
 
 
-def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
+def create_plot(all_data, raw, count, x_scale, y_scale, xn, yn, fn_out, batch):
     # Sorting by mean y-value helps aligning plots with labels
     def mean_y(algo):
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
@@ -21,10 +21,6 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
 
     for algo in sorted(all_data.keys(), key=mean_y):
         xm, ym = (metrics[xn], metrics[yn])
-        # Now generate each plot
-        handles = []
-        labels = []
-        plt.figure(figsize=(12, 9))
 
         # Find range for logit x-scale
         min_x, max_x = 1, 0
@@ -32,67 +28,79 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
         min_x = min([min_x] + [x for x in xs if x > 0])
         max_x = max([max_x] + [x for x in xs if x < 1])
-        linestyles = create_linestyles(als)
-        # Print all results separately
-        for entry_x, entry_y, algo_name in zip(axs, ays, als):
-            color, faded, linestyle, marker = linestyles[algo_name]
-            (handle,) = plt.plot(
-                entry_x, entry_y, "-", label=algo_name, ms=7, mew=3, lw=2, marker=marker
-            )
 
-            handles.append(handle)
-            labels.append(algo_name)
+        splits = int(len(axs) / 50)
 
-        ax = plt.gca()
-        ax.set_ylabel(ym["description"])
-        ax.set_xlabel(xm["description"])
-        # Custom scales of the type --x-scale a3
-        if x_scale[0] == "a":
-            alpha = float(x_scale[1:])
+        for index in range(0, splits + 1):
+            # Now generate each plot
+            handles = []
+            labels = []
+            plt.figure(figsize=(12, 9))
 
-            def fun(x):
-                return 1 - (1 - x) ** (1 / alpha)
+            start = index * 50
+            end = (1+index) * 50
 
-            def inv_fun(x):
-                return 1 - (1 - x) ** alpha
+            linestyles = create_linestyles(als)
+            # Print all results separately
+            for entry_x, entry_y, algo_name in zip(axs[start:end], ays[start:end], als[start:end]):
+                color, faded, linestyle, marker = linestyles[algo_name]
+                (handle,) = plt.plot(
+                    entry_x, entry_y, "-", label=algo_name, ms=7, mew=3, lw=2, marker=marker
+                )
 
-            ax.set_xscale("function", functions=(fun, inv_fun))
-            if alpha <= 3:
-                ticks = [inv_fun(x) for x in np.arange(0, 1.2, 0.2)]
-                plt.xticks(ticks)
-            if alpha > 3:
-                from matplotlib import ticker
+                handles.append(handle)
+                labels.append(algo_name)
 
-                ax.xaxis.set_major_formatter(ticker.LogitFormatter())
-                # plt.xticks(ticker.LogitLocator().tick_values(min_x, max_x))
-                plt.xticks([0, 1 / 2, 1 - 1e-1, 1 - 1e-2, 1 - 1e-3, 1 - 1e-4, 1])
-        # Other x-scales
-        else:
-            ax.set_xscale(x_scale)
-        ax.set_yscale(y_scale)
-        ax.set_title(get_plot_label(xm, ym))
-        plt.gca().get_position()
-        # plt.gca().set_position([box.x0, box.y0, box.width * 0.8, box.height])
-        ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9}, ncol=2)
-        plt.grid(visible=True, which="major", color="0.65", linestyle="-")
-        plt.setp(ax.get_xminorticklabels(), visible=True)
+            ax = plt.gca()
+            ax.set_ylabel(ym["description"])
+            ax.set_xlabel(xm["description"])
+            # Custom scales of the type --x-scale a3
+            if x_scale[0] == "a":
+                alpha = float(x_scale[1:])
 
-        # Logit scale has to be a subset of (0,1)
-        if "lim" in xm and x_scale != "logit":
-            x0, x1 = xm["lim"]
-            plt.xlim(max(x0, 0), min(x1, 1))
-        elif x_scale == "logit":
-            plt.xlim(min_x, max_x)
-        if "lim" in ym:
-            plt.ylim(ym["lim"])
+                def fun(x):
+                    return 1 - (1 - x) ** (1 / alpha)
 
-        # Workaround for bug https://github.com/matplotlib/matplotlib/issues/6789
-        ax.spines["bottom"]._adjust_location()
-        output_path = fn_out.split(".")
-        output_path = f"_{algo}.".join(output_path)
+                def inv_fun(x):
+                    return 1 - (1 - x) ** alpha
 
-        plt.savefig(output_path, bbox_inches="tight")
-        plt.close()
+                ax.set_xscale("function", functions=(fun, inv_fun))
+                if alpha <= 3:
+                    ticks = [inv_fun(x) for x in np.arange(0, 1.2, 0.2)]
+                    plt.xticks(ticks)
+                if alpha > 3:
+                    from matplotlib import ticker
+
+                    ax.xaxis.set_major_formatter(ticker.LogitFormatter())
+                    # plt.xticks(ticker.LogitLocator().tick_values(min_x, max_x))
+                    plt.xticks([0, 1 / 2, 1 - 1e-1, 1 - 1e-2, 1 - 1e-3, 1 - 1e-4, 1])
+            # Other x-scales
+            else:
+                ax.set_xscale(x_scale)
+            ax.set_yscale(y_scale)
+            ax.set_title(get_plot_label(xm, ym))
+            plt.gca().get_position()
+            # plt.gca().set_position([box.x0, box.y0, box.width * 0.8, box.height])
+            ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9}, ncol=2)
+            plt.grid(visible=True, which="major", color="0.65", linestyle="-")
+            plt.setp(ax.get_xminorticklabels(), visible=True)
+
+            # Logit scale has to be a subset of (0,1)
+            if "lim" in xm and x_scale != "logit":
+                x0, x1 = xm["lim"]
+                plt.xlim(max(x0, 0), min(x1, 1))
+            elif x_scale == "logit":
+                plt.xlim(min_x, max_x)
+            if "lim" in ym:
+                plt.ylim(ym["lim"])
+
+            # Workaround for bug https://github.com/matplotlib/matplotlib/issues/6789
+            ax.spines["bottom"]._adjust_location()
+            output_path = fn_out.split(".")
+            output_path = f"_{algo}_k_{count}_part_{index + 1}.".join(output_path)
+
+            plt.savefig(output_path, bbox_inches="tight")
+            plt.close()
 
 
 if __name__ == "__main__":
@@ -141,5 +149,5 @@ if __name__ == "__main__":
         raise Exception("Nothing to plot")
 
     create_plot(
-        runs, args.raw, args.x_scale, args.y_scale, args.x_axis, args.y_axis, args.output, args.batch
+        runs, args.raw, args.count, args.x_scale, args.y_scale, args.x_axis, args.y_axis, args.output, args.batch
     )
