@@ -89,7 +89,12 @@ def percentile_999(times):
 
 def index_size(queries, attrs):
     # TODO(erikbern): should replace this with peak memory usage or something
-    return attrs.get("index_size", 0)
+    size = attrs.get("index_size", 0)
+
+    if size != 0:
+        size /= pow(1024, 2)
+
+    return size
 
 
 def build_time(queries, attrs):
@@ -189,14 +194,14 @@ all_metrics = {
         "worst": float("inf"),
     },
     "indexsize": {
-        "description": "Index size (kB)",
+        "description": "Index size (GB)",
         "function": lambda true_distances, run_distances, metrics, times, run_attrs: index_size(
             true_distances, run_attrs
         ),  # noqa
         "worst": float("inf"),
     },
     "queriessize": {
-        "description": "Index size (kB)/Queries per second (s)",
+        "description": "Index size (GB)/Queries per second (s)",
         "function": lambda true_distances, run_distances, metrics, times, run_attrs: index_size(
             true_distances, run_attrs
         )
