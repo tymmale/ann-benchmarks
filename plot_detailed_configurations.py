@@ -93,11 +93,18 @@ def create_plot(all_data, raw, count, x_scale, y_scale, xn, yn, fn_out, batch):
                 plt.xlim(min_x, max_x)
             if "lim" in ym:
                 plt.ylim(ym["lim"])
+            # Omit all recall values that are > 0.2
+            if "k-nn" == xn and x_scale == "linear":
+                x0, x1 = xm["lim"]
+                plt.xlim(max(x0, 0.1), min(x1, 1))
+            if "k-nn" == yn and y_scale == "linear":
+                y0, y1 = ym["lim"]
+                plt.ylim(max(y0, 0.1), min(y1, 1))
 
             # Workaround for bug https://github.com/matplotlib/matplotlib/issues/6789
             ax.spines["bottom"]._adjust_location()
             output_path = fn_out.split(".")
-            output_path = f"_{algo}_k_{count}_part_{index + 1}.".join(output_path)
+            output_path = f"_{algo}_part_{index + 1}.".join(output_path)
 
             plt.savefig(output_path, bbox_inches="tight")
             plt.close()
