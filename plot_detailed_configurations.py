@@ -24,8 +24,20 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
     for algo in algos_sorted:
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
 
-        min_x = min([x for x in xs if x > 0], default=1)
-        max_x = max([x for x in xs if x < 1], default=0)
+        # Filter out values below 0.1
+        if "k-nn" == xn and x_scale == "linear":
+            filtered_indices = [i for i, x in enumerate(axs) if x >= 0.1]
+            axs = [axs[i] for i in filtered_indices]
+            ays = [ays[i] for i in filtered_indices]
+            als = [als[i] for i in filtered_indices]
+        elif "k-nn" == yn and y_scale == "linear":
+            filtered_indices = [i for i, y in enumerate(ays) if y >= 0.1]
+            ays = [ays[i] for i in filtered_indices]
+            axs = [axs[i] for i in filtered_indices]
+            als = [als[i] for i in filtered_indices]
+
+        min_x = min([x for x in axs if x > 0], default=1)
+        max_x = max([x for x in axs if x < 1], default=0)
         splits = len(axs) // 50 + 1
 
         linestyles = create_linestyles(als)
