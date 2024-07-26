@@ -12,36 +12,32 @@ from ann_benchmarks.plotting.utils_detailed_configurations import (compute_metri
                                                                    create_pointset, get_plot_label)
 from ann_benchmarks.results import get_unique_algorithms, load_all_results
 
-
-def create_plot(all_data, raw, count, x_scale, y_scale, xn, yn, fn_out, batch):
+def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
     # Sorting by mean y-value helps aligning plots with labels
     def mean_y(algo):
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
         return -np.log(np.array(ys)).mean()
 
-    for algo in sorted(all_data.keys(), key=mean_y):
-        xm, ym = (metrics[xn], metrics[yn])
+    algos_sorted = sorted(all_data.keys(), key=mean_y)
+    xm, ym = (metrics[xn], metrics[yn])
 
-        # Find range for logit x-scale
-        min_x, max_x = 1, 0
-
+    for algo in algos_sorted:
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
-        min_x = min([min_x] + [x for x in xs if x > 0])
-        max_x = max([max_x] + [x for x in xs if x < 1])
 
-        splits = int(len(axs) / 50)
+        min_x = min([x for x in xs if x > 0], default=1)
+        max_x = max([x for x in xs if x < 1], default=0)
+        splits = len(axs) // 50 + 1
 
-        for index in range(0, splits + 1):
-            # Now generate each plot
+        linestyles = create_linestyles(als)
+
+        for index in range(splits):
+            start = index * 50
+            end = (index + 1) * 50
+
+            plt.figure(figsize=(12, 9))
             handles = []
             labels = []
-            plt.figure(figsize=(12, 9))
 
-            start = index * 50
-            end = (1+index) * 50
-
-            linestyles = create_linestyles(als)
-            # Print all results separately
             for entry_x, entry_y, algo_name in zip(axs[start:end], ays[start:end], als[start:end]):
                 color, faded, linestyle, marker = linestyles[algo_name]
                 (handle,) = plt.plot(
@@ -57,30 +53,21 @@ def create_plot(all_data, raw, count, x_scale, y_scale, xn, yn, fn_out, batch):
             # Custom scales of the type --x-scale a3
             if x_scale[0] == "a":
                 alpha = float(x_scale[1:])
-
-                def fun(x):
-                    return 1 - (1 - x) ** (1 / alpha)
-
-                def inv_fun(x):
-                    return 1 - (1 - x) ** alpha
-
+                fun = lambda x: 1 - (1 - x) ** (1 / alpha)
+                inv_fun = lambda x: 1 - (1 - x) ** alpha
                 ax.set_xscale("function", functions=(fun, inv_fun))
                 if alpha <= 3:
                     ticks = [inv_fun(x) for x in np.arange(0, 1.2, 0.2)]
                     plt.xticks(ticks)
-                if alpha > 3:
+                else:
                     from matplotlib import ticker
-
                     ax.xaxis.set_major_formatter(ticker.LogitFormatter())
-                    # plt.xticks(ticker.LogitLocator().tick_values(min_x, max_x))
                     plt.xticks([0, 1 / 2, 1 - 1e-1, 1 - 1e-2, 1 - 1e-3, 1 - 1e-4, 1])
-            # Other x-scales
             else:
                 ax.set_xscale(x_scale)
+
             ax.set_yscale(y_scale)
             ax.set_title(get_plot_label(xm, ym))
-            plt.gca().get_position()
-            # plt.gca().set_position([box.x0, box.y0, box.width * 0.8, box.height])
             ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9}, ncol=2)
             plt.grid(visible=True, which="major", color="0.65", linestyle="-")
             plt.setp(ax.get_xminorticklabels(), visible=True)
@@ -101,11 +88,8 @@ def create_plot(all_data, raw, count, x_scale, y_scale, xn, yn, fn_out, batch):
                 y0, y1 = ym["lim"]
                 plt.ylim(max(y0, 0.1), min(y1, 1))
 
-            # Workaround for bug https://github.com/matplotlib/matplotlib/issues/6789
             ax.spines["bottom"]._adjust_location()
-            output_path = fn_out.split(".")
-            output_path = f"_{algo}_part_{index + 1}.".join(output_path)
-
+            output_path = f"{fn_out.rsplit('.', 1)[0]}_{algo}_part_{index + 1}.{fn_out.rsplit('.', 1)[1]}"
             plt.savefig(output_path, bbox_inches="tight")
             plt.close()
 
@@ -156,5 +140,5 @@ if __name__ == "__main__":
         raise Exception("Nothing to plot")
 
     create_plot(
-        runs, args.raw, args.count, args.x_scale, args.y_scale, args.x_axis, args.y_axis, args.output, args.batch
+        runs, args.raw, args.x_scale, args.y_scale, args.x_axis, args.y_axis, args.output, args.batch
     )
