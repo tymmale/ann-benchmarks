@@ -29,6 +29,19 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
     min_x, max_x = 1, 0
     for algo in sorted(all_data.keys(), key=mean_y):
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
+
+        # Filter out values below 0.1
+        if "k-nn" == xn and x_scale == "linear":
+            filtered_indices = [i for i, x in enumerate(xs) if x >= 0.1]
+            xs = [xs[i] for i in filtered_indices]
+            ys = [ys[i] for i in filtered_indices]
+            ls = [ls[i] for i in filtered_indices]
+        elif "k-nn" == yn and y_scale == "linear":
+            filtered_indices = [i for i, y in enumerate(ys) if y >= 0.1]
+            ys = [ys[i] for i in filtered_indices]
+            xs = [xs[i] for i in filtered_indices]
+            ls = [ls[i] for i in filtered_indices]
+
         min_x = min([min_x] + [x for x in xs if x > 0])
         max_x = max([max_x] + [x for x in xs if x < 1])
         color, faded, linestyle, marker = linestyles[algo]
@@ -36,7 +49,20 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
             xs, ys, "-", label=algo, color=color, ms=7, mew=3, lw=3, marker=marker
         )
         handles.append(handle)
+
         if raw:
+            # Filter out values below 0.1
+            if "k-nn" == xn and x_scale == "linear":
+                filtered_indices = [i for i, x in enumerate(axs) if x >= 0.1]
+                axs = [axs[i] for i in filtered_indices]
+                ays = [ays[i] for i in filtered_indices]
+                als = [als[i] for i in filtered_indices]
+            elif "k-nn" == yn and y_scale == "linear":
+                filtered_indices = [i for i, y in enumerate(ays) if y >= 0.1]
+                ays = [ays[i] for i in filtered_indices]
+                axs = [axs[i] for i in filtered_indices]
+                als = [als[i] for i in filtered_indices]
+
             (handle2,) = plt.plot(
                 axs, ays, "-", label=algo, color=faded, ms=5, mew=2, lw=2, marker=marker
             )
