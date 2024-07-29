@@ -19,7 +19,7 @@ class ElasticsearchKNN(BaseANN):
         self.num_candidates = 100
 
         index_options_str = "-".join(sorted(f"{k}-{v}" for k, v in self.index_options.items()))
-        self.index_name = f"{metric}-{dimension}-{index_options_str}"
+        self.index_name = f"{metric}-{dimension}-{index_options_str.lower()}"
         self.similarity_metric = self._vector_similarity_metric(metric)
 
         self.client = Elasticsearch(["http://localhost:9200"])
@@ -66,8 +66,8 @@ class ElasticsearchKNN(BaseANN):
                     "similarity": self.similarity_metric,
                     "index_options": {
                         "type": self.index_options.get("type", "hnsw"),
-                        "m": self.index_options["m"],
-                        "ef_construction": self.index_options["ef_construction"],
+                        "m": self.index_options["M"],
+                        "ef_construction": self.index_options["efConstruction"],
                     },
                 },
             },
