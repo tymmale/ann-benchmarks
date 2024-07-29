@@ -1,4 +1,4 @@
-scfloat:
+float:
   angular:
   - base_args: ['@metric', '@dimension']
     constructor: ElasticsearchKNN
