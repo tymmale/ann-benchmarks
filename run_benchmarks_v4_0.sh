@@ -8,7 +8,7 @@ echo Started benchmark at `date`
 
 mkdir -p logs
 
-for ds in glove-50-angular glove-100-angular sift-128-euclidean nytimes-256-angular fashion-mnist-784-euclidan; do
+for ds in glove-50-angular glove-100-angular sift-128-euclidean nytimes-256-angular fashion-mnist-784-euclidean; do
 	for algo in vespa-hnsw pgvector-hnsw pgvector-ivfflat elasticsearch-hnsw weaviate-hnsw qdrant-hnsw redisearch-hnsw; do
 		$PYTHON run.py --dataset $ds --definitions $ALGODEF --runs 3 --count 2 4 10 20 50 100 --parallelism $PARALLEL --algorithm $algo
 		cp annb.log logs/${ds}_parallel_${PARALLEL}_v4.log
