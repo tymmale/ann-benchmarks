@@ -10,7 +10,7 @@ float:
       redisearch:
         arg_groups: [[1, 2, 4, 8, 12, 16, 24, 36, 48], [ 128, 256, 512 ]]
         args: {}
-        query_args: [[10, 20, 40, 80, 120, 200, 400]]
+        query_args: [[40, 80, 120, 200, 400]]
   euclidean:
     - base_args: [ '@metric' ]
       constructor: Redisearch

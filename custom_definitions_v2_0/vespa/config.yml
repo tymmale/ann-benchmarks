@@ -126,50 +126,50 @@ float:
         M-1-ef-128:
           arg_groups: [ { M: 1, efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-2-ef-128:
           arg_groups: [ { M: 2, efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-4-ef-128:
           arg_groups: [ { M: 4, efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-8-ef-128:
           arg_groups: [ { M: 8, efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-12-ef-128:
           arg_groups: [ { M: 12,efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-16-ef-128:
           arg_groups: [ { M: 16, efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-24-ef-128:
           arg_groups: [ { M: 24, efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-36-ef-128:
           arg_groups: [ { M: 36, efConstruction: 128 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-48-ef-128:
           arg_groups: [ { M: 48, efConstruction: 128 } ]
           args: { }
         M-1-ef-256:
           arg_groups: [ { M: 1, efConstruction: 256 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-2-ef-256:
           arg_groups: [ { M: 2, efConstruction: 256 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-4-ef-256:
           arg_groups: [ { M: 4, efConstruction: 256 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-8-ef-256:
           arg_groups: [ { M: 8, efConstruction: 256 } ]
           args: { }
@@ -197,15 +197,15 @@ float:
         M-1-ef-512:
           arg_groups: [ { M: 1, efConstruction: 512 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-2-ef-512:
           arg_groups: [ { M: 2, efConstruction: 512 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-4-ef-512:
           arg_groups: [ { M: 4, efConstruction: 512 } ]
           args: { }
-          query_args: [ [ 40, 80, 120, 200, 400 ] ]
+          query_args: [ [ 20, 40, 80, 120, 200, 400 ] ]
         M-8-ef-512:
           arg_groups: [ { M: 8, efConstruction: 512 } ]
           args: { }
