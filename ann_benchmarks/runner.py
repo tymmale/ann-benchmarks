@@ -278,7 +278,6 @@ function"""
                 except ValueError:
                     # Terminate recording
                     process.kill()
-                    pass
     finally:
         algo.done()
 
