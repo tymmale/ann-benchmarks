@@ -254,25 +254,31 @@ function"""
                 process = subprocess.Popen(["nmon", "-s", "1", "-c", "86400", "-tF",
                                             f"results/nmon/{definition.constructor}_{dataset_name}{algorithm_arguments}_querying_k_{entry}.nmon"])
 
-                descriptor, results = run_individual_query(algo, X_train, X_test, distance, entry, run_count, batch)
+                # NOTE: I know, this is not a nice solution ):
+                try:
+                    descriptor, results = run_individual_query(algo, X_train, X_test, distance, entry, run_count, batch)
 
-                descriptor.update({
-                    "build_time": build_time,
-                    "index_size": index_size,
-                    "algo": definition.algorithm,
-                    "dataset": dataset_name
-                })
+                    descriptor.update({
+                        "build_time": build_time,
+                        "index_size": index_size,
+                        "algo": definition.algorithm,
+                        "dataset": dataset_name
+                    })
 
-                end_time = time.time()
-                print(f"[Runner] Run for {definition.algorithm} and arguments {definition.arguments} "
-                      f"took {end_time - start_time} seconds.")
+                    end_time = time.time()
+                    print(f"[Runner] Run for {definition.algorithm} and arguments {definition.arguments} "
+                          f"took {end_time - start_time} seconds.")
 
-                print(f"Ending benchmark for {definition.algorithm} and arguments {definition.arguments} at {datetime.fromtimestamp(end_time)}")
+                    print(f"Ending benchmark for {definition.algorithm} and arguments {definition.arguments} at {datetime.fromtimestamp(end_time)}")
 
-                # Terminate recording
-                process.kill()
+                    # Terminate recording
+                    process.kill()
 
-                store_results(dataset_name, entry, definition, query_arguments, descriptor, results, batch)
+                    store_results(dataset_name, entry, definition, query_arguments, descriptor, results, batch)
+                except ValueError:
+                    # Terminate recording
+                    process.kill()
+                    pass
     finally:
         algo.done()
 

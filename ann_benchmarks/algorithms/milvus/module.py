@@ -240,6 +240,20 @@ class MilvusHNSW(Milvus):
         self._index_m = index_param.get("M", None)
         self._index_ef = index_param.get("efConstruction", None)
 
+    def query(self, v, n):
+        if self.search_params["params"]["ef"] < n:
+            raise ValueError("n must be smaller than ef")
+        else:
+            results = self.collection.search(
+                data=[v],
+                anns_field="vector",
+                param=self.search_params,
+                limit=n,
+                output_fields=["id"]
+            )
+            ids = [r.entity.get("id") for r in results[0]]
+            return ids
+
     def get_index_param(self):
         return {
             "index_type": "HNSW",
