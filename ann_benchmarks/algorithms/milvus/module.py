@@ -215,7 +215,7 @@ class MilvusIVFPQ(Milvus):
         self._index_nbits = index_param.get("nbits", None)
 
     def get_index_param(self):
-        if self._dim % self._index_m == 0:
+        if not self._dim % self._index_m == 0:
             raise ValueError("dimension must be able to be divided by m")
         return {
             "index_type": "IVF_PQ",
