@@ -11,7 +11,7 @@ if __name__ == "__main__":
     parser.add_argument("--recompute", action="store_true", help="Recompute metrics")
     args = parser.parse_args()
 
-    datasets = DATASETS.keys()
+    datasets = ["glove-50-angular", "glove-100-angular", "sift-128-euclidean", "nytimes-256-angular", "fashion-mnist-784-euclidean"]
     dfs = []
     for dataset_name in datasets:
         print("Looking at dataset", dataset_name)
