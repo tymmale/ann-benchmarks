@@ -92,7 +92,7 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
                 plt.xlim(min_x, max_x)
             if "lim" in ym:
                 plt.ylim(ym["lim"])
-            # Omit all recall values that are > 0.2
+            # Omit all recall values that are > 0.1
             if "k-nn" == xn and x_scale == "linear":
                 x0, x1 = xm["lim"]
                 plt.xlim(max(x0, 0.1), min(x1, 1))
