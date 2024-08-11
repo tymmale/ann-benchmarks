@@ -93,7 +93,7 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
     else:
         ax.set_xscale(x_scale)
     ax.set_yscale(y_scale)
-    ax.set_title(f"{algo_name} Performance: {get_plot_label(xm, ym)}" if algo_name else get_plot_label(xm, ym))
+    ax.set_title(f"{algo_name} performance: {get_plot_label(xm, ym)}" if algo_name else get_plot_label(xm, ym))
     plt.gca().get_position()
     ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9})
     plt.grid(visible=True, which="major", color="0.65", linestyle="-")
@@ -153,7 +153,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not args.output:
-        args.output = "results/"
+        dataset_names = "_".join(args.datasets)
+        args.output = f"results/{dataset_names}"
         print("writing output to %s" % args.output)
 
     datasets = []
@@ -178,8 +179,7 @@ if __name__ == "__main__":
 
     for entry, algo_name in zip(runs, unique_algorithms):
         linestyles = create_linestyles(args.datasets)
-        dataset_names = "_".join(args.datasets)
-        output_file = f"{args.output}{algo_name}_{dataset_names}.png"
+        output_file = f"{args.output}_{algo_name}.png"
         create_plot(
             entry, args.raw, args.x_scale, args.y_scale, args.x_axis, args.y_axis, output_file, linestyles, args.batch,
         )
