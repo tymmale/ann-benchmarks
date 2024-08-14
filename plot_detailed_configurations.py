@@ -102,7 +102,7 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
 
             ax.spines["bottom"]._adjust_location()
             output_path = f"{fn_out.rsplit('.', 1)[0]}_{algo}_part_{index + 1}.{fn_out.rsplit('.', 1)[1]}"
-            plt.savefig(output_path, bbox_inches="tight")
+            plt.savefig(output_path, bbox_inches="tight",  pad_inches=0.2)
             plt.close()
 
 

@@ -95,7 +95,9 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
     ax.set_yscale(y_scale)
     ax.set_title(f"{algo_name} performance: {get_plot_label(xm, ym)}" if algo_name else get_plot_label(xm, ym))
     plt.gca().get_position()
-    ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9})
+    # ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9})
+    # If legends should be beneath the plot
+    ax.legend(handles, labels, loc="center", bbox_to_anchor=(0.5, -0.15), prop={"size": 9}, ncol=(len(labels)))
     plt.grid(visible=True, which="major", color="0.65", linestyle="-")
     plt.setp(ax.get_xminorticklabels(), visible=True)
 
@@ -116,7 +118,7 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
 
     ax.spines["bottom"]._adjust_location()
 
-    plt.savefig(fn_out, bbox_inches="tight")
+    plt.savefig(fn_out, bbox_inches="tight", pad_inches=0.2)
     plt.close()
 
 

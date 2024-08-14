@@ -98,7 +98,9 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
     ax.set_title(get_plot_label(xm, ym))
     plt.gca().get_position()
     # plt.gca().set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9})
+    # ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9})
+    # If legends should be beneath the plot
+    ax.legend(handles, labels, loc="center", bbox_to_anchor=(0.5, -0.15), prop={"size": 9}, ncol=(len(labels)/2))
     plt.grid(visible=True, which="major", color="0.65", linestyle="-")
     plt.setp(ax.get_xminorticklabels(), visible=True)
 
@@ -122,7 +124,7 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
     # Workaround for bug https://github.com/matplotlib/matplotlib/issues/6789
     ax.spines["bottom"]._adjust_location()
 
-    plt.savefig(fn_out, bbox_inches="tight")
+    plt.savefig(fn_out, bbox_inches="tight", pad_inches=0.2)
     plt.close()
 
 
