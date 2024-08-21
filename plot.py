@@ -20,6 +20,8 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
     labels = []
     plt.figure(figsize=(12, 9))
 
+    metrics_to_filter = ["k-nn", "epsilon", "largeepsilon"]
+
     # Sorting by mean y-value helps aligning plots with labels
     def mean_y(algo):
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
@@ -31,12 +33,12 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
 
         # Filter out values below 0.1
-        if "k-nn" == xn and x_scale == "linear":
+        if xn in metrics_to_filter and x_scale == "linear":
             filtered_indices = [i for i, x in enumerate(xs) if x >= 0.1]
             xs = [xs[i] for i in filtered_indices]
             ys = [ys[i] for i in filtered_indices]
             ls = [ls[i] for i in filtered_indices]
-        elif "k-nn" == yn and y_scale == "linear":
+        elif yn in metrics_to_filter and y_scale == "linear":
             filtered_indices = [i for i, y in enumerate(ys) if y >= 0.1]
             ys = [ys[i] for i in filtered_indices]
             xs = [xs[i] for i in filtered_indices]
