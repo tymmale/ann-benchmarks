@@ -73,9 +73,9 @@ def store_results(dataset_name: str, count: int, definition: Definition, query_a
 
 
 def load_all_results(dataset: Optional[str] = None,
-                 count: Optional[int] = None,
-                algorithm: Optional[str] = None,
-                 batch_mode: bool = False) -> Iterator[Tuple[dict, h5py.File]]:
+                     count: Optional[int] = None,
+                     algorithm: Optional[str] = None,
+                     batch_mode: bool = False) -> Iterator[Tuple[dict, h5py.File]]:
     """
     Loads all the results from the HDF5 files in the specified path.
 
