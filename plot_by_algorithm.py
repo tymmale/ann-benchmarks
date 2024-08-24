@@ -44,6 +44,11 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
                 ys = [ys[i] for i in filtered_indices]
                 xs = [xs[i] for i in filtered_indices]
                 ls = [ls[i] for i in filtered_indices]
+            if "indexsize" in yn:
+                filtered_indices = [i for i, y in enumerate(ys) if y >= 0.0]
+                ys = [ys[i] for i in filtered_indices]
+                xs = [xs[i] for i in filtered_indices]
+                ls = [ls[i] for i in filtered_indices]
 
             min_x = min([min_x] + [x for x in xs if x > 0])
             max_x = max([max_x] + [x for x in xs if x < 1])
@@ -61,6 +66,11 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, linestyles, bat
                     als = [als[i] for i in filtered_indices]
                 elif "k-nn" == yn and y_scale == "linear":
                     filtered_indices = [i for i, y in enumerate(ays) if y >= 0.1]
+                    ays = [ays[i] for i in filtered_indices]
+                    axs = [axs[i] for i in filtered_indices]
+                    als = [als[i] for i in filtered_indices]
+                if "indexsize" in yn:
+                    filtered_indices = [i for i, y in enumerate(ays) if y >= 0.0]
                     ays = [ays[i] for i in filtered_indices]
                     axs = [axs[i] for i in filtered_indices]
                     als = [als[i] for i in filtered_indices]

@@ -35,6 +35,11 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
             ays = [ays[i] for i in filtered_indices]
             axs = [axs[i] for i in filtered_indices]
             als = [als[i] for i in filtered_indices]
+        if "indexsize" in yn:
+            filtered_indices = [i for i, y in enumerate(ays) if y >= 0.0]
+            ays = [ays[i] for i in filtered_indices]
+            axs = [axs[i] for i in filtered_indices]
+            als = [als[i] for i in filtered_indices]
 
         min_x = min([x for x in axs if x > 0], default=1)
         max_x = max([x for x in axs if x < 1], default=0)
