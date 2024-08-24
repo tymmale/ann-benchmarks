@@ -85,8 +85,8 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
 
             ax.set_yscale(y_scale)
             ax.set_title(get_plot_label(xm, ym))
-            ax.legend(handles, labels, loc="center left", bbox_to_anchor=(1, 0.5), prop={"size": 9}, ncol=2)
-            plt.grid(visible=True, which="major", color="0.65", linestyle="-")
+            ax.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.1), prop={"size": 9}, ncol=2)
+            legend = plt.grid(visible=True, which="major", color="0.65", linestyle="-")
             plt.setp(ax.get_xminorticklabels(), visible=True)
 
             # Logit scale has to be a subset of (0,1)
