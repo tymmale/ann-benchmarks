@@ -11,11 +11,11 @@ if __name__ == "__main__":
     data = pd.read_csv(file_path)
 
     columns_of_interest = ["qps", "k-nn", "indexsize", "build"]
-    parameters = ["M", "efConstruction", "efSearch"]
+    parameters = ["M", "ef_construction", "ef_search"]
 
     data["M"] = data["parameters"].str.extract(r"'?M?m?'?:(\d+)").astype(float)
-    data["efConstruction"] = data["parameters"].str.extract(r"'?ef_?c?C?onstruction'?:(\d+)").astype(float)
-    data["efSearch"] = data["parameters"].str.extract(r"'?ef[_?s?S?earch]?'?:(\d+)").astype(float)
+    data["ef_construction"] = data["parameters"].str.extract(r"'?ef_?c?C?onstruction'?:(\d+)").astype(float)
+    data["ef_search"] = data["parameters"].str.extract(r"'?ef[_?s?S?earch]?'?:(\d+)").astype(float)
 
     data = data.dropna(subset=parameters)
     data = data[parameters + columns_of_interest]
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     sns.pairplot(grouped_data, x_vars=parameters ,y_vars=columns_of_interest, kind="scatter")
 
-    plt.suptitle("Effect of 'M', 'efConstruction' and 'efSearch' on QPS, Recall (k-nn), Index Size, "
+    plt.suptitle("Effect of 'M', 'ef_construction' and 'ef_search' on QPS, Recall (k-nn), Index Size, "
                  "and Build Time", y=1.02
                  )
     plt.savefig("m_efConstruction_efSearch_mean.png")
