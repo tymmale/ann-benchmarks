@@ -12,7 +12,7 @@ from ann_benchmarks.plotting.utils_detailed_configurations import (compute_metri
                                                                    create_pointset, get_plot_label)
 from ann_benchmarks.results import get_unique_algorithms, load_all_results
 
-def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
+def create_plot(all_data, x_scale, y_scale, xn, yn, fn_out, batch):
     # Sorting by mean y-value helps aligning plots with labels
     def mean_y(algo):
         xs, ys, ls, axs, ays, als = create_pointset(all_data[algo], xn, yn)
@@ -86,7 +86,6 @@ def create_plot(all_data, raw, x_scale, y_scale, xn, yn, fn_out, batch):
             ax.set_yscale(y_scale)
             ax.set_title(get_plot_label(xm, ym))
             ax.legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.1), prop={"size": 9}, ncol=2)
-            legend = plt.grid(visible=True, which="major", color="0.65", linestyle="-")
             plt.setp(ax.get_xminorticklabels(), visible=True)
 
             # Logit scale has to be a subset of (0,1)
@@ -157,5 +156,5 @@ if __name__ == "__main__":
         raise Exception("Nothing to plot")
 
     create_plot(
-        runs, args.raw, args.x_scale, args.y_scale, args.x_axis, args.y_axis, args.output, args.batch
+        runs, args.x_scale, args.y_scale, args.x_axis, args.y_axis, args.output, args.batch
     )
